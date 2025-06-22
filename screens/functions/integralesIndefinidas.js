@@ -1,4 +1,4 @@
-const metodoDeSimpsonContainer = document.getElementById("simpson");
+const metodoDeSimpsonContainer = document.getElementById("integrales-indefinidas");
 
 metodoDeSimpsonContainer.innerHTML = "";
 

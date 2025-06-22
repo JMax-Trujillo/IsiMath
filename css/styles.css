@@ -175,3 +175,133 @@ body {
     color: #94a3b8;
     font-size: 1.1rem;
 }
+
+
+
+
+/* TODO: Calcuadora.js */
+
+/* Add these to your styles.css */
+
+.calculadora-basica-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    width: 100%;
+    /* border: 1px solid #ccc; /* For visualization during development */
+    /* border-radius: var(--border-radius); */
+    position: relative; /* For lightbulb positioning */
+    min-height: 400px; /* Adjust as needed */
+}
+
+.calculadora-basica-content h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+.operation-buttons-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    overflow: hidden; /* To keep border radius clean for inner buttons */
+}
+
+.calculator-button {
+    padding: 0.7rem 1.2rem;
+    border: none;
+    background-color: #f0f4f8; /* Light background */
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    transition: all 0.2s ease-in-out;
+    border-right: 1px solid #e2e8f0; /* Separator */
+}
+
+.calculator-button:last-child {
+    border-right: none;
+}
+
+.calculator-button:hover {
+    background-color: #e2eec2;
+}
+
+.calculator-button.active-operation {
+    background-color: #d1edc1; /* Greenish background as in image */
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.matrix-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 600px; /* Limit width of input section */
+    /* border: 1px dashed #a8a8a8; /* For visualization */
+    padding: 1rem;
+    border-radius: var(--border-radius);
+}
+
+.matrix-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.matrix-input-group label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+}
+
+.matrix-input-group span {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.matrix-dimension-input {
+    width: 60px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.matrix-dimension-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.action-button {
+    padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-left: auto; /* Push to the right */
+}
+
+.action-button:hover {
+    background-color: var(--primary-hover);
+}
+
+.lightbulb-icon {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    font-size: 2.5rem;
+    color: #fcd34d; /* Yellow color */
+    cursor: pointer;
+}
