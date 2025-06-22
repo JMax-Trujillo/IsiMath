@@ -1,67 +1,58 @@
-/* Add/Confirm these to your styles.css */
-/* Provided by user */
+/* css/calculadora.css */
 
-/* General container for the calculator */
 .calculadora-basica-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    width: 100%;
-    position: relative;
-    min-height: 400px;
-}
-
-.calculadora-basica-content h2 {
-    margin-bottom: 1.5rem;
-    color: var(--text-color);
-}
-
-/* Operation buttons at the top (Suma, Resta, Producto, Transpuesta) */
-.operation-buttons-container {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    border: 1px solid #e2e8f0;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-}
-
-.calculator-button {
-    padding: 0.7rem 1.2rem;
-    border: none;
-    background-color: #f0f4f8;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-color);
-    transition: all 0.2s ease-in-out;
-    border-right: 1px solid #e2e8f0;
-}
-
-.calculator-button:last-child {
-    border-right: none;
-}
-
-.calculator-button:hover {
-    background-color: #e2eec2;
-}
-
-.calculator-button.active-operation {
-    background-color: #d1edc1; /* Greenish background as in image */
-    color: var(--text-color);
-    font-weight: 600;
-}
-
-/* Section for matrix dimension inputs and "Hacer" buttons */
-.matrix-dimension-section {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     width: 100%;
-    max-width: 600px;
-    padding: 1rem;
+    max-width: 800px; /* Ajustar según sea necesario */
+    margin: 0 auto;
+    text-align: left;
+}
+
+.calculadora-basica-content h2 {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.operation-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.calculator-button {
+    padding: 0.75rem 1.5rem;
     border-radius: var(--border-radius);
+    border: none;
+    background-color: #e2e8f0; /* Gris claro */
+    color: var(--text-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.calculator-button:hover {
+    background-color: #cbd5e1;
+}
+
+.calculator-button.active-operation {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.calculator-button:active {
+    transform: scale(0.98);
+}
+
+.matrix-dimension-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .matrix-input-group {
@@ -72,215 +63,239 @@
     padding: 1rem;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
+    flex-wrap: wrap; /* Permitir ajuste en pantallas pequeñas */
 }
 
 .matrix-input-group label {
     font-weight: 600;
     font-size: 1.1rem;
-    margin-right: 0.5rem;
+    min-width: 20px; /* Asegurar espacio para la etiqueta */
 }
 
 .matrix-input-group span {
     color: #64748b;
-    font-size: 0.95rem;
 }
 
 .matrix-dimension-input {
-    width: 60px;
-    padding: 0.4rem 0.6rem;
+    width: 60px; /* Ancho fijo para números de entrada */
+    padding: 0.5rem;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 0.95rem;
+    border-radius: var(--border-radius);
     text-align: center;
+    font-size: 1rem;
+    -moz-appearance: textfield; /* Ocultar flechas para Firefox */
 }
 
-.matrix-dimension-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+.matrix-dimension-input::-webkit-outer-spin-button,
+.matrix-dimension-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.matrix-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto; /* Empuja los botones a la derecha */
 }
 
 .action-button {
-    padding: 0.5rem 1rem;
-    background-color: var(--primary-color);
-    color: white;
+    padding: 0.6rem 1.2rem;
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: background-color 0.2s ease;
-    margin-left: auto;
+    font-weight: 500;
 }
 
-.action-button:hover {
+/* Botón "Hacer" */
+.action-button.hacer {
+    background-color: var(--primary-color);
+    color: white;
+}
+.action-button.hacer:hover {
     background-color: var(--primary-hover);
 }
 
-/* Section to display matrix inputs and editors */
-.matrices-display-section {
-    width: 100%;
-    max-width: 600px;
-    margin-top: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* Space between matrix containers */
+/* Botón "Mostrar" (Verde) */
+.action-button.show {
+    background-color: #22c55e; /* Verde */
+    color: white;
+}
+.action-button.show:hover {
+    background-color: #16a34a;
 }
 
-/* Matrix editor styles */
+/* Botón "Ocultar" (Morado) */
+.action-button.hide {
+    background-color: #9333ea; /* Morado */
+    color: white;
+}
+.action-button.hide:hover {
+    background-color: #7e22ce;
+}
+
+/* Botón "Eliminar" (Rojo) */
+.action-button.delete {
+    background-color: #ef4444; /* Rojo */
+    color: white;
+}
+.action-button.delete:hover {
+    background-color: #dc2626;
+}
+
+/* Contenedor del editor de matrices */
 .matrix-container {
-    padding: 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: var(--border-radius);
     background-color: #f8fafc;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
+    margin-top: 1rem; /* Espacio entre la entrada de dimensiones y la matriz */
+    position: relative; /* Para el posicionamiento absoluto de los botones de acción */
 }
 
-.matrix-title {
+.matrix-container.hidden {
+    display: none;
+}
+
+.matrix-container .matrix-title {
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: var(--text-color);
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 .matrix-editor {
     display: grid;
-    gap: 5px;
-    /* grid-template-columns will be set by JS */
-    padding: 10px;
-    border: 1px solid #ccc; /* Inner border for the grid itself */
-    border-radius: var(--border-radius);
-    background-color: #fff;
-    box-shadow: var(--shadow-sm);
+    gap: 0.5rem;
+    max-width: fit-content;
+    margin: 0 auto; /* Centrar la cuadrícula */
 }
 
 .matrix-editor input {
-    width: 50px;
-    padding: 5px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
+    width: 55px; /* Ajustar el tamaño de las celdas de la matriz */
+    height: 35px;
+    padding: 0.25rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
     text-align: center;
-    font-size: 0.9rem;
-}
-
-.add-matrix-button, .perform-operation-button {
-    padding: 0.75rem 1.5rem;
-    background-color: #28a745; /* Green for add */
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    margin-top: 1rem;
     font-size: 1rem;
-    font-weight: 500;
+    -moz-appearance: textfield;
 }
 
+.matrix-editor input::-webkit-outer-spin-button,
+.matrix-editor input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.matrix-editor-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.add-matrix-button,
+.perform-operation-button {
+    display: block;
+    width: fit-content;
+    margin: 1rem auto;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+.add-matrix-button {
+    background-color: #22c55e; /* Verde para añadir */
+    color: white;
+}
 .add-matrix-button:hover {
-    background-color: #218838;
+    background-color: #16a34a;
+}
+.add-matrix-button:disabled {
+    background-color: #a7f3d0; /* Verde más claro cuando está deshabilitado */
+    cursor: not-allowed;
 }
 
 .perform-operation-button {
-    background-color: var(--primary-color); /* Blue for final operation */
-    margin-top: 2rem; /* More space before the main action */
+    background-color: var(--primary-color);
+    color: white;
 }
-
 .perform-operation-button:hover {
     background-color: var(--primary-hover);
 }
 
 .error-message {
-    color: #dc3545; /* Red for errors */
+    color: #ef4444; /* Rojo para errores */
+    text-align: center;
     margin-top: 1rem;
     font-weight: 500;
-    text-align: center;
 }
 
-.lightbulb-icon {
-    position: absolute;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    font-size: 2.5rem;
-    color: #fcd34d;
-    cursor: pointer;
-}
-
-/* Styles for result display */
 .matrix-result-container {
-    margin-top: 2rem;
+    background-color: #e0f2fe; /* Fondo azul claro para resultados */
     padding: 1.5rem;
-    border: 1px solid #a8dadc;
     border-radius: var(--border-radius);
-    background-color: #e0f2f7;
     box-shadow: var(--shadow-sm);
-    width: 100%;
-    max-width: 600px;
+    margin-top: 2rem;
     text-align: center;
-}
-
-.matrix-result-container h4 {
-    color: #1b4d8a;
-    margin-bottom: 1rem;
 }
 
 .result-matrix-editor {
     display: grid;
-    gap: 5px;
-    padding: 10px;
-    border: 1px solid #b3e5fc;
+    gap: 0.5rem;
+    max-width: fit-content;
+    margin: 0.5rem auto 0;
+    border: 1px solid #90cdf4; /* Borde azul para la matriz resultante */
+    padding: 0.75rem;
     border-radius: var(--border-radius);
-    background-color: #ffffff;
 }
 
-.result-matrix-editor div { /* For displaying results, not inputs */
-    width: 50px;
-    padding: 5px;
-    border: 1px solid #bbdefb;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 0.9rem;
-    background-color: #e3f2fd;
+.result-matrix-editor div {
+    width: 60px; /* Celdas para la matriz resultante */
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: #bfdbfe; /* Azul más claro para las celdas de resultado */
+    border-radius: 6px;
     font-weight: 500;
 }
 
-/* Add these new styles to your styles.css */
-
-/* Button group for Mostrar/Ocultar/Hacer */
-.matrix-action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    margin-left: auto; /* Pushes buttons to the right */
-}
-
-/* Specific styles for the Show/Hide buttons if needed, or reuse .action-button */
-.show-hide-button {
-    padding: 0.5rem 1rem;
-    background-color: #6c757d; /* Grey for show/hide, adjust as desired */
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
+.lightbulb-icon {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    font-size: 2.5rem;
+    color: #facc15; /* Amarillo */
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: transform 0.2s ease;
 }
 
-.show-hide-button:hover {
-    background-color: #5a6268;
+.lightbulb-icon:hover {
+    transform: scale(1.1);
 }
 
-/* Style to hide the matrix editor */
-.matrix-container.hidden {
-    display: none;
-}
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    /* Mantén los estilos existentes de media query para main-content, sidebar, etc. en styles.css */
+    /* ... (copia y pega de tu styles.css si es necesario aquí, o asegúrate de que styles.css ya los maneje) */
 
-/* Ensure the matrix-input-group looks good with the new buttons */
-.matrix-input-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background-color: #f8fafc;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    .matrix-input-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .matrix-action-buttons {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 0.5rem;
+    }
+    .matrix-dimension-input {
+        width: 80px;
+    }
 }
-

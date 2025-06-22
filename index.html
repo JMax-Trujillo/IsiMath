@@ -6,6 +6,9 @@
     <title>IsiMath</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/matrix/calculadora.css">
+    <link rel="stylesheet" href="css/matrix/determinantes.css">
+    <link rel="stylesheet" href="css/matrix/inversa.css">
+    <link rel="stylesheet" href="css/matrix/metodosIterativos.css">
     <link rel="stylesheet" href="css/functions/integrales.css">
 </head>
 <body>
@@ -130,6 +133,20 @@
         </div>
     </main>
     
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
     <!-- TODO: principal -->
     <script type="module" src="screens/main.js"></script>
     <!--! funciones -->

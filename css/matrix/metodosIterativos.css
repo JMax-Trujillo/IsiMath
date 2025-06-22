@@ -1,0 +1,492 @@
+/* Estilos generales para la sección de Métodos Iterativos */
+.iterativos-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 1rem;
+}
+
+.iterativos-content h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    color: #1e40af;
+}
+
+/* Contenedor de botones de método */
+.method-buttons-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+}
+
+.method-buttons-container .calculator-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: #e2e8f0;
+    color: var(--text-color);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.method-buttons-container .calculator-button:hover {
+    background-color: #cbd5e1;
+}
+
+.method-buttons-container .calculator-button.active-method {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Sección de entrada de la matriz A y vector b */
+.system-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 600px; /* Un poco más ancho para albergar los inputs de b */
+    margin-bottom: 1.5rem;
+}
+
+.system-input-group {
+    display: flex;
+    align-items: center;
+    background-color: #f0f4f8;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    gap: 10px;
+}
+
+.system-input-group label {
+    font-weight: 600;
+    color: var(--text-color);
+    min-width: 20px;
+}
+
+.system-input-group span {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.system-dimension-input {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.system-action-buttons {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+}
+
+.action-button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.action-button.hacer {
+    background-color: var(--primary-color);
+    color: white;
+}
+.action-button.hacer:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Editor de matrices (A y b) */
+.matrices-and-vector-display-section {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 2rem;
+}
+
+.matrix-container, .vector-container {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    padding: 1.5rem;
+    width: auto;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.matrix-title, .vector-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.matrix-editor, .vector-editor {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    justify-content: center;
+}
+
+.matrix-editor input, .vector-editor input {
+    width: 50px;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+    background-color: #f8fafc;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.matrix-editor input:focus, .vector-editor input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Campos de entrada para aproximación inicial, tolerancia y max iteraciones */
+.parameters-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 2rem;
+    background-color: #f0f4f8;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.parameter-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.parameter-input-group label {
+    font-weight: 600;
+    color: var(--text-color);
+    min-width: 150px; /* Alineación de etiquetas */
+}
+
+.parameter-input-group input[type="number"],
+.parameter-input-group input[type="text"] {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Botones de acción principales (Resolver y Ver Pasos) */
+.iterativos-action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+.iterativos-action-buttons .main-action-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.iterativos-action-buttons .main-action-button.solve {
+    background-color: #22c55e;
+    color: white;
+}
+.iterativos-action-buttons .main-action-button.solve:hover {
+    background-color: #16a34a;
+    transform: translateY(-1px);
+}
+
+.iterativos-action-buttons .main-action-button.steps {
+    background-color: #f97316;
+    color: white;
+}
+.iterativos-action-buttons .main-action-button.steps:hover {
+    background-color: #ea580c;
+    transform: translateY(-1px);
+}
+
+/* Sección de resultado */
+.iterativos-result-container {
+    background-color: #e0f2fe;
+    border: 1px solid #90cdf4;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.iterativos-result-container h4 {
+    font-size: 1.3rem;
+    color: #1e40af;
+    margin-bottom: 1rem;
+}
+
+.iterativos-result-vector-editor {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    justify-content: center;
+    background-color: white;
+}
+
+.iterativos-result-vector-editor div {
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+/* Mensajes de error */
+.error-message {
+    color: #ef4444;
+    margin-top: 1rem;
+    font-weight: 500;
+    min-height: 20px;
+}
+
+/* Modal de Pasos y Teoría (reutilizado) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-color);
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #64748b;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover {
+    color: #1e293b;
+}
+
+.modal-tabs {
+    display: flex;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-tab-button {
+    flex: 1;
+    padding: 12px 15px;
+    background-color: #f0f4f8;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.modal-tab-button.active-tab {
+    background-color: white;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.modal-tab-button:hover {
+    background-color: #e2e8f0;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active-content {
+    display: block;
+}
+
+.tab-content h5 {
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: #1e40af;
+}
+
+.tab-content p, .tab-content ul, .tab-content ol {
+    margin-bottom: 1rem;
+}
+
+.tab-content ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.tab-content ol {
+    list-style-type: decimal;
+    padding-left: 20px;
+}
+
+.tab-content pre {
+    background-color: #e2e8f0;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+
+.tab-content strong {
+    color: #1e40af;
+}
+
+/* Estilos específicos para los pasos */
+.step-item {
+    margin-bottom: 1.5rem;
+    border-left: 3px solid var(--primary-color);
+    padding-left: 15px;
+}
+
+.step-item:last-child {
+    margin-bottom: 0;
+}
+
+.step-item h6 {
+    font-size: 1rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.step-item p {
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+/* Estilos para matrices/vectores dentro de los pasos/teoría */
+.inline-matrix-display {
+    display: inline-grid;
+    grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+    gap: 5px;
+    border: 1px solid #cbd5e1;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f8fafc;
+    vertical-align: middle;
+    margin: 0 5px;
+}
+.inline-matrix-display div {
+    text-align: center;
+    padding: 3px;
+}
+
+.inline-vector-display {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 5px;
+    border: 1px solid #cbd5e1;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f8fafc;
+    vertical-align: middle;
+    margin: 0 5px;
+}
+
+.inline-vector-display div {
+    text-align: center;
+    padding: 3px;
+}
+
+
+.math-formula {
+    font-family: 'Times New Roman', serif;
+    font-size: 1.1em;
+    margin-bottom: 1em;
+    display: block;
+}

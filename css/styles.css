@@ -1,3 +1,5 @@
+/* styles.css */
+
 :root {
     --primary-color: #3b82f6;
     --primary-hover: #2563eb;
@@ -174,4 +176,21 @@ body {
 .placeholder-message p {
     color: #94a3b8;
     font-size: 1.1rem;
+}
+
+/* Ajustes responsivos generales que no son específicos de la calculadora */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    .sidebar {
+        left: -var(--sidebar-width);
+    }
+    .sidebar.active {
+        left: 0;
+    }
+    .menu-toggle {
+        display: flex;
+    }
 }
