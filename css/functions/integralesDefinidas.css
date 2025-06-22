@@ -1,0 +1,85 @@
+/* css/functions/integralesDefinidas.css */
+
+/* Reset de algunos estilos para acercarse a lo predeterminado del navegador */
+.contenedor-integrales-definidas * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.contenedor-integrales-definidas {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #f0f0f0; /* Un fondo claro predeterminado */
+    color: #333; /* Color de texto oscuro predeterminado */
+    width: 100%; /* Ensure it takes full width within its parent */
+}
+
+.equation-editor-container {
+    max-width: 600px;
+    width: 100%;
+    padding: 20px;
+    background-color: #fff; /* Fondo blanco predeterminado */
+    border: 1px solid #ccc; /* Borde simple */
+    border-radius: 8px; /* Bordes ligeramente redondeados */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    margin-top: 20px;
+}
+
+.equation-editor-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    color: #000; /* Color oscuro para el título */
+    border-bottom: 1px solid #eee; /* Línea divisoria suave */
+    padding-bottom: 10px;
+}
+
+.equation-editor-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+/* Estilos para math-field */
+.contenedor-integrales-definidas math-field {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #999; /* Borde más visible */
+    border-radius: 4px;
+    background-color: #fff;
+    color: #000; /* Texto oscuro */
+    font-size: 1.1em;
+    min-height: 40px;
+    line-height: normal;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.contenedor-integrales-definidas math-field:focus-within {
+    border-color: #007bff; /* Borde azul al enfocar */
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra de enfoque */
+}
+
+/* Override MathLive default colors for default mode */
+.contenedor-integrales-definidas math-field::part(content) {
+    color: #000; /* Asegurar texto negro */
+}
+
+/* Media Queries para Responsividad */
+@media (max-width: 480px) {
+    .equation-editor-container {
+        padding: 15px;
+    }
+    .equation-editor-container h2 {
+        font-size: 1.5em;
+    }
+    .contenedor-integrales-definidas math-field {
+        font-size: 1em;
+    }
+}

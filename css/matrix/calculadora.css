@@ -49,27 +49,51 @@
     transform: scale(0.98);
 }
 
+/* Contenedor general para las secciones de entrada de matriz (A, B) */
+/* Este contenedor organiza las secciones de "Dimensiones" y las matrices resultantes */
+.matrix-input-section {
+    display: flex;
+    flex-wrap: wrap; /* Permite que las matrices se envuelvan a la siguiente línea si no hay espacio */
+    justify-content: center; /* Centra las matrices horizontalmente en la fila */
+    gap: 1.5rem; /* Espacio entre los bloques de matriz (A y B) */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos para cada sección de dimensiones (donde están los inputs de Filas/Columnas y los botones "Hacer", etc.) */
 .matrix-dimension-section {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Apila los elementos dentro de esta sección */
     gap: 1rem;
+    flex-grow: 1; /* Permite que crezca para ocupar el espacio */
+    flex-basis: 300px; /* Ancho base para la sección de dimensiones antes de encogerse/crecer */
+    max-width: calc(50% - 0.75rem); /* Limita el ancho para permitir dos columnas con el gap */
+    box-sizing: border-box; /* Incluye padding y border en el cálculo del ancho */
+
+    /* Reafirmar estilos de caja para cada sección de dimensión */
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
 }
 
 .matrix-input-group {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background-color: #f8fafc;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    flex-wrap: wrap; /* Permitir ajuste en pantallas pequeñas */
+    /* Estos estilos se movieron a .matrix-dimension-section para evitar redundancia */
+    /* background-color: #f8fafc; */
+    /* padding: 1rem; */
+    /* border-radius: var(--border-radius); */
+    /* box-shadow: var(--shadow-sm); */
+    flex-wrap: wrap; /* Permite que los inputs se envuelvan en pantallas pequeñas */
+    justify-content: space-between; /* Espacio entre label/span y inputs */
 }
 
 .matrix-input-group label {
     font-weight: 600;
     font-size: 1.1rem;
-    min-width: 20px; /* Asegurar espacio para la etiqueta */
+    min-width: 20px;
 }
 
 .matrix-input-group span {
@@ -95,7 +119,9 @@
 .matrix-action-buttons {
     display: flex;
     gap: 0.5rem;
-    margin-left: auto; /* Empuja los botones a la derecha */
+    /* margin-left: auto; */ /* Esto ya no es ideal si el padre es column */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    justify-content: flex-end; /* Alinea los botones a la derecha dentro de la sección */
 }
 
 .action-button {
@@ -103,8 +129,8 @@
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
-    transition: background-color 0.2s ease;
     font-weight: 500;
+    transition: background-color 0.2s ease;
 }
 
 /* Botón "Hacer" */
@@ -145,12 +171,18 @@
 
 /* Contenedor del editor de matrices */
 .matrix-container {
-    background-color: #f8fafc;
+    background-color: #f8fafc; /* Reafirmar el color de fondo si el padre no lo aplica */
     padding: 1.5rem;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     margin-top: 1rem; /* Espacio entre la entrada de dimensiones y la matriz */
-    position: relative; /* Para el posicionamiento absoluto de los botones de acción */
+    position: relative;
+    flex-grow: 1; /* Permite que el editor crezca si es necesario */
+    /* Estas propiedades (flex-basis, max-width) son cruciales si matrix-container y matrix-dimension-section
+       son hermanos directos dentro de .matrix-input-section. */
+    flex-basis: 300px; /* Ancho base, similar a la sección de dimensiones */
+    max-width: calc(50% - 0.75rem); /* Limita el ancho para un layout de dos columnas con gap */
+    box-sizing: border-box;
 }
 
 .matrix-container.hidden {
@@ -167,8 +199,12 @@
 .matrix-editor {
     display: grid;
     gap: 0.5rem;
-    max-width: fit-content;
     margin: 0 auto; /* Centrar la cuadrícula */
+    overflow-x: auto; /* Para el scroll horizontal */
+    padding-bottom: 10px; /* Para que la barra de scroll sea visible */
+    max-width: 100%; /* Asegurar que no se desborde del contenedor principal si no es necesario el scroll */
+    /* REMOVE or COMMENT OUT this line: */
+    /* width: fit-content; */
 }
 
 .matrix-editor input {
@@ -248,11 +284,14 @@
 .result-matrix-editor {
     display: grid;
     gap: 0.5rem;
-    max-width: fit-content;
+    /* max-width: fit-content; */ /* Esto se debería evitar si queremos flexibilidad */
     margin: 0.5rem auto 0;
     border: 1px solid #90cdf4; /* Borde azul para la matriz resultante */
     padding: 0.75rem;
     border-radius: var(--border-radius);
+    overflow-x: auto; /* También para la matriz de resultados */
+    padding-bottom: 10px;
+    max-width: 100%; /* Asegura que no se desborde */
 }
 
 .result-matrix-editor div {
@@ -282,9 +321,6 @@
 
 /* Ajustes responsivos */
 @media (max-width: 768px) {
-    /* Mantén los estilos existentes de media query para main-content, sidebar, etc. en styles.css */
-    /* ... (copia y pega de tu styles.css si es necesario aquí, o asegúrate de que styles.css ya los maneje) */
-
     .matrix-input-group {
         flex-direction: column;
         align-items: flex-start;
@@ -297,5 +333,14 @@
     }
     .matrix-dimension-input {
         width: 80px;
+    }
+    /* En pantallas pequeñas, cada sección de matriz debería ocupar todo el ancho */
+    .matrix-dimension-section,
+    .matrix-container { /* Si son hermanos, esto los hace full width */
+        max-width: 100%;
+        flex-basis: auto; /* Remover base fija para permitir que ocupe el 100% */
+    }
+    .matrix-input-section {
+        gap: 1rem; /* Ajustar el gap en pantallas pequeñas */
     }
 }

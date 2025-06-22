@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const matrixEditorDiv = document.createElement("div");
             matrixEditorDiv.classList.add("matrix-editor");
-            matrixEditorDiv.style.gridTemplateColumns = `repeat(${cols}, minmax(40px, 1fr))`; 
+            matrixEditorDiv.style.gridTemplateColumns = `repeat(${cols}, minmax(55px, 1fr))`; 
 
             for (let i = 0; i < rows; i++) {
                 for (let j = 0; j < cols; j++) {
