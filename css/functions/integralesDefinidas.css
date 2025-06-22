@@ -1,85 +1,269 @@
 /* css/functions/integralesDefinidas.css */
 
-/* Reset de algunos estilos para acercarse a lo predeterminado del navegador */
-.contenedor-integrales-definidas * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+.integrales-definidas-content {
+    display: flex;
+    flex-direction: column; /* Por defecto en columna para móviles */
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px; /* Un poco más ancho para acomodar dos columnas */
+    margin: 0 auto;
+    text-align: left;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    box-sizing: border-box; /* Asegura que padding no aumente el tamaño */
 }
 
-.contenedor-integrales-definidas {
+.integrales-definidas-content h2 {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+}
+
+/* Contenedor principal para el layout de 2 columnas */
+.integral-main-layout {
+    display: flex;
+    flex-direction: column; /* Por defecto en columna para móviles */
+    gap: 2rem;
+    width: 100%;
+}
+
+@media (min-width: 900px) { /* Cambiar a 2 columnas en pantallas más grandes */
+    .integral-main-layout {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start; /* Alinea arriba los elementos */
+    }
+}
+
+/* Contenedor de Inputs (columna izquierda en desktop) */
+.integral-inputs-section {
+    flex: 1; /* Ocupa espacio flexible */
+    min-width: 300px; /* Ancho mínimo */
+    max-width: 500px; /* Ancho máximo */
     display: flex;
     flex-direction: column;
+    gap: 1.2rem;
+    padding: 1rem;
+    border-right: none; /* Sin borde a la derecha en móvil */
+}
+
+@media (min-width: 900px) {
+    .integral-inputs-section {
+        border-right: 1px solid #e2e8f0; /* Separador visual */
+        padding-right: 2rem;
+    }
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.25rem;
+}
+
+/* Estilos para math-field (MathLive) */
+.integral-inputs-section math-field {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    background-color: #f9fafb;
+    color: var(--text-color);
+    font-size: 1.1rem;
+    min-height: 48px; /* Altura mínima para MathLive */
+    line-height: normal;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.integral-inputs-section math-field:focus-within {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Sombra de enfoque con primary-color */
+}
+
+/* Campos de entrada numéricos */
+.integral-inputs-section input[type="number"] {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    color: var(--text-color);
+    background-color: #f9fafb;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.integral-inputs-section input[type="number"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.action-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    align-self: center; /* Centrar el botón si está en un flex column */
+    width: fit-content;
+    margin-top: 1rem;
+}
+
+.action-button.calculate {
+    background-color: var(--primary-color);
+    color: white;
+    width: 100%; /* Botón de calcular ocupa todo el ancho de la sección */
+    max-width: 250px; /* Limitar el ancho máximo del botón */
+    margin: 1.5rem auto 0; /* Centrar y margen superior */
+}
+
+.action-button.calculate:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.error-message {
+    color: #dc2626; /* Rojo para errores */
+    background-color: #fee2e2;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+    text-align: center;
+    border: 1px solid #fca5a5;
+    display: none; /* Oculto por defecto */
+}
+.error-message.active {
+    display: block; /* Mostrar cuando esté activo */
+}
+
+/* Contenedor de Resultados y Gráfica (columna derecha en desktop) */
+.integral-results-section {
+    flex: 1.5; /* Ocupa más espacio que la sección de inputs */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    align-items: center; /* Centrar contenido en la columna */
+}
+
+.result-container {
+    padding: 1.5rem;
+    background-color: #e0f2fe; /* Color de fondo azul claro para resultados */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    width: 100%;
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.result-container.active {
+    display: flex; /* Mostrar cuando esté activo */
+}
+
+.result-container h3 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
+}
+
+.result-value {
+    font-size: 2rem; /* Más grande para el resultado final */
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+/* Contenedor de la graficadora */
+.graph-container {
+    width: 100%;
+    max-width: 600px; /* Limitar ancho de la gráfica */
+    height: 350px; /* Altura fija para el lienzo de la gráfica */
+    background-color: #f1f5f9; /* Fondo claro para la gráfica */
+    border-radius: var(--border-radius);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+    overflow: hidden;
+    display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    background-color: #f0f0f0; /* Un fondo claro predeterminado */
-    color: #333; /* Color de texto oscuro predeterminado */
-    width: 100%; /* Ensure it takes full width within its parent */
+    position: relative;
 }
 
-.equation-editor-container {
-    max-width: 600px;
+/* Botón para mostrar resolución */
+.show-steps-button {
+    background-color: #60a5fa; /* Un azul más suave */
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: 1rem;
+}
+
+.show-steps-button:hover {
+    background-color: #3b82f6; /* primary-color */
+    transform: translateY(-1px);
+}
+
+/* Contenedor para la resolución paso a paso */
+.resolution-container {
     width: 100%;
-    padding: 20px;
-    background-color: #fff; /* Fondo blanco predeterminado */
-    border: 1px solid #ccc; /* Borde simple */
-    border-radius: 8px; /* Bordes ligeramente redondeados */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
-    margin-top: 20px;
+    padding: 1.5rem;
+    background-color: #ecfdf5; /* Fondo verde claro, para diferenciar */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    margin-top: 2rem;
+    text-align: left;
+    display: none; /* Oculto por defecto */
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.equation-editor-container h2 {
+.resolution-container.active {
+    display: flex;
+}
+
+.resolution-container h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
     text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.8em;
-    color: #000; /* Color oscuro para el título */
-    border-bottom: 1px solid #eee; /* Línea divisoria suave */
-    padding-bottom: 10px;
+    font-size: 1.6rem;
 }
 
-.equation-editor-container label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
+.resolution-step {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #f0fdf4;
+    border-left: 4px solid #34d399; /* Borde verde para pasos */
+    border-radius: 6px;
 }
 
-/* Estilos para math-field */
-.contenedor-integrales-definidas math-field {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #999; /* Borde más visible */
+.resolution-step p {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.resolution-step pre {
+    background-color: #e2e8f0;
+    padding: 0.75rem;
     border-radius: 4px;
-    background-color: #fff;
-    color: #000; /* Texto oscuro */
-    font-size: 1.1em;
-    min-height: 40px;
-    line-height: normal;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.contenedor-integrales-definidas math-field:focus-within {
-    border-color: #007bff; /* Borde azul al enfocar */
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sombra de enfoque */
-}
-
-/* Override MathLive default colors for default mode */
-.contenedor-integrales-definidas math-field::part(content) {
-    color: #000; /* Asegurar texto negro */
-}
-
-/* Media Queries para Responsividad */
-@media (max-width: 480px) {
-    .equation-editor-container {
-        padding: 15px;
-    }
-    .equation-editor-container h2 {
-        font-size: 1.5em;
-    }
-    .contenedor-integrales-definidas math-field {
-        font-size: 1em;
-    }
+    overflow-x: auto;
+    font-family: monospace;
+    white-space: pre-wrap; /* Permite saltos de línea */
 }
