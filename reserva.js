@@ -128,7 +128,7 @@ function createSizeSelector() {
     `;
     
     // Agregar opciones según el método
-    const maxSize = currentMethod === 'Sarrus' ? 3 : 6; // Sarrus solo para 3x3
+    const maxSize = currentMethod === 'Sarrus' ? 3 : 6;
     const minSize = currentMethod === 'Sarrus' ? 3 : 2;
     
     for (let i = minSize; i <= maxSize; i++) {
@@ -257,7 +257,7 @@ function createActionButtons() {
     calculateBtn.addEventListener('click', calculateDeterminant);
     
     const stepsBtn = document.createElement('button');
-    stepsBtn.textContent = 'Ver Pasos';
+    stepsBtn.textContent = 'Ver Pasos Detallados';
     stepsBtn.style.cssText = `
         background: #34a853;
         color: white;
@@ -379,11 +379,10 @@ function getMinor(matrix, row, col) {
 // Método de Reducción por filas
 function calculateRowReduction(matrix) {
     const n = matrix.length;
-    const mat = matrix.map(row => [...row]); // Copia de la matriz
+    const mat = matrix.map(row => [...row]);
     let det = 1;
     
     for (let i = 0; i < n; i++) {
-        // Buscar pivote
         let maxRow = i;
         for (let k = i + 1; k < n; k++) {
             if (Math.abs(mat[k][i]) > Math.abs(mat[maxRow][i])) {
@@ -391,20 +390,17 @@ function calculateRowReduction(matrix) {
             }
         }
         
-        // Intercambiar filas si es necesario
         if (maxRow !== i) {
             [mat[i], mat[maxRow]] = [mat[maxRow], mat[i]];
             det *= -1;
         }
         
-        // Si el pivote es 0, el determinante es 0
         if (Math.abs(mat[i][i]) < 1e-10) {
             return 0;
         }
         
         det *= mat[i][i];
         
-        // Eliminación
         for (let k = i + 1; k < n; k++) {
             const factor = mat[k][i] / mat[i][i];
             for (let j = i; j < n; j++) {
@@ -413,7 +409,7 @@ function calculateRowReduction(matrix) {
         }
     }
     
-    return Math.round(det * 1000000) / 1000000; // Redondear para evitar errores de precisión
+    return Math.round(det * 1000000) / 1000000;
 }
 
 // Función para mostrar resultado
@@ -487,7 +483,7 @@ function showError(message) {
     }, 5000);
 }
 
-// Función para mostrar pasos
+// Función mejorada para mostrar pasos detallados
 function showSteps() {
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -509,8 +505,8 @@ function showSteps() {
         background: white;
         padding: 30px;
         border-radius: 16px;
-        max-width: 80%;
-        max-height: 80%;
+        max-width: 90%;
+        max-height: 90%;
         overflow-y: auto;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         position: relative;
@@ -548,20 +544,23 @@ function showSteps() {
     });
     
     const title = document.createElement('h2');
-    title.textContent = `Pasos del Método de ${currentMethod}`;
+    title.textContent = `Pasos Detallados: Método de ${currentMethod}`;
     title.style.cssText = `
         color: #2c3e50;
         margin-bottom: 20px;
         font-size: 24px;
         font-weight: 600;
         padding-right: 40px;
+        border-bottom: 3px solid #4285f4;
+        padding-bottom: 10px;
     `;
     
     const stepsContent = document.createElement('div');
-    stepsContent.innerHTML = getStepsContent();
+    stepsContent.innerHTML = getDetailedStepsContent();
     stepsContent.style.cssText = `
-        line-height: 1.6;
+        line-height: 1.8;
         color: #333;
+        font-size: 16px;
     `;
     
     modalContent.appendChild(closeBtn);
@@ -579,354 +578,121 @@ function showSteps() {
     document.body.appendChild(modal);
 }
 
-// Función para generar contenido de pasos
-function getStepsContent() {
+// Función mejorada para generar contenido detallado de pasos
+function getDetailedStepsContent() {
     const matrix = getMatrixValues();
     
     switch (currentMethod) {
         case 'Sarrus':
-            return generateSarrusSteps(matrix);
+            return generateDetailedSarrusSteps(matrix);
         case 'Cofactores':
-            return generateCofactorsSteps(matrix);
+            return generateDetailedCofactorsSteps(matrix);
         case 'Reducción por filas':
-            return generateRowReductionSteps(matrix);
+            return generateDetailedRowReductionSteps(matrix);
         default:
             return '<p>Método no implementado</p>';
     }
 }
 
-// Generar pasos para Sarrus
-function generateSarrusSteps(matrix) {
-    if (matrix.length !== 3) return '<p>El método de Sarrus solo funciona para matrices 3x3</p>';
+// Función para crear representación visual de matriz
+function createMatrixHTML(matrix, highlightCells = []) {
+    const n = matrix.length;
+    let html = '<table style="margin: 10px auto; border-collapse: collapse; font-family: monospace; font-size: 16px;">';
+    
+    for (let i = 0; i < n; i++) {
+        html += '<tr>';
+        for (let j = 0; j < n; j++) {
+            let cellStyle = 'border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;';
+            
+            // Aplicar resaltado si está especificado
+            const highlight = highlightCells.find(h => h.row === i && h.col === j);
+            if (highlight) {
+                cellStyle += ` background: ${highlight.color}; color: ${highlight.textColor || '#000'};`;
+            }
+            
+            html += `<td style="${cellStyle}">${matrix[i][j]}</td>`;
+        }
+        html += '</tr>';
+    }
+    html += '</table>';
+    return html;
+}
+
+// Generar pasos detallados para Sarrus
+function generateDetailedSarrusSteps(matrix) {
+    if (matrix.length !== 3) return '<p style="color: #dc3545; font-weight: bold;">⚠️ El método de Sarrus solo funciona para matrices 3x3</p>';
+    
+    const pos1 = matrix[0][0] * matrix[1][1] * matrix[2][2];
+    const pos2 = matrix[0][1] * matrix[1][2] * matrix[2][0];
+    const pos3 = matrix[0][2] * matrix[1][0] * matrix[2][1];
+    const totalPos = pos1 + pos2 + pos3;
+    
+    const neg1 = matrix[0][2] * matrix[1][1] * matrix[2][0];
+    const neg2 = matrix[0][1] * matrix[1][0] * matrix[2][2];
+    const neg3 = matrix[0][0] * matrix[1][2] * matrix[2][1];
+    const totalNeg = neg1 + neg2 + neg3;
+    
+    const result = totalPos - totalNeg;
     
     return `
-        <div style="font-family: monospace; font-size: 14px;">
-            <h3>Método de Sarrus para matriz 3x3:</h3>
-            <p><strong>Paso 1:</strong> Escribir la matriz y repetir las dos primeras columnas:</p>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                ${matrix[0][0]} ${matrix[0][1]} ${matrix[0][2]} | ${matrix[0][0]} ${matrix[0][1]}<br>
-                ${matrix[1][0]} ${matrix[1][1]} ${matrix[1][2]} | ${matrix[1][0]} ${matrix[1][1]}<br>
-                ${matrix[2][0]} ${matrix[2][1]} ${matrix[2][2]} | ${matrix[2][0]} ${matrix[2][1]}
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+                <h3 style="color: #1565c0; margin-top: 0;">📚 ¿Qué es el Método de Sarrus?</h3>
+                <p>El método de Sarrus es una técnica específica para calcular determinantes de matrices 3×3. 
+                Consiste en extender la matriz agregando las dos primeras columnas al lado derecho, 
+                luego sumar los productos de las diagonales principales y restar los productos de las diagonales secundarias.</p>
             </div>
-            
-            <p><strong>Paso 2:</strong> Calcular productos de diagonales principales (↘):</p>
-            <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                ${matrix[0][0]} × ${matrix[1][1]} × ${matrix[2][2]} = ${matrix[0][0] * matrix[1][1] * matrix[2][2]}<br>
-                ${matrix[0][1]} × ${matrix[1][2]} × ${matrix[2][0]} = ${matrix[0][1] * matrix[1][2] * matrix[2][0]}<br>
-                ${matrix[0][2]} × ${matrix[1][0]} × ${matrix[2][1]} = ${matrix[0][2] * matrix[1][0] * matrix[2][1]}<br>
-                <strong>Suma: ${matrix[0][0] * matrix[1][1] * matrix[2][2] + matrix[0][1] * matrix[1][2] * matrix[2][0] + matrix[0][2] * matrix[1][0] * matrix[2][1]}</strong>
-            </div>
-            
-            <p><strong>Paso 3:</strong> Calcular productos de diagonales secundarias (↙):</p>
-            <div style="background: #ffe8e8; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                ${matrix[0][2]} × ${matrix[1][1]} × ${matrix[2][0]} = ${matrix[0][2] * matrix[1][1] * matrix[2][0]}<br>
-                ${matrix[0][1]} × ${matrix[1][0]} × ${matrix[2][2]} = ${matrix[0][1] * matrix[1][0] * matrix[2][2]}<br>
-                ${matrix[0][0]} × ${matrix[1][2]} × ${matrix[2][1]} = ${matrix[0][0] * matrix[1][2] * matrix[2][1]}<br>
-                <strong>Suma: ${matrix[0][2] * matrix[1][1] * matrix[2][0] + matrix[0][1] * matrix[1][0] * matrix[2][2] + matrix[0][0] * matrix[1][2] * matrix[2][1]}</strong>
-            </div>
-            
-            <p><strong>Paso 4:</strong> Determinante = Suma principal - Suma secundaria:</p>
-            <div style="background: #e8f0fe; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                <strong>det(A) = ${matrix[0][0] * matrix[1][1] * matrix[2][2] + matrix[0][1] * matrix[1][2] * matrix[2][0] + matrix[0][2] * matrix[1][0] * matrix[2][1]} - ${matrix[0][2] * matrix[1][1] * matrix[2][0] + matrix[0][1] * matrix[1][0] * matrix[2][2] + matrix[0][0] * matrix[1][2] * matrix[2][1]} = ${calculateSarrus(matrix)}</strong>
-            </div>
-        </div>
-    `;
-}
 
-// Generar pasos para Cofactores
-function generateCofactorsSteps(matrix) {
-    const n = matrix.length;
-    
-    if (n === 1) {
-        return `
-            <div style="font-family: monospace; font-size: 14px;">
-                <h3>Método de Cofactores para matriz 1x1:</h3>
-                <p><strong>Resultado:</strong> Para una matriz 1x1, el determinante es el único elemento.</p>
-                <div style="background: #e8f0fe; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    <strong>det(A) = ${matrix[0][0]}</strong>
-                </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-top: 0;">📝 Matriz Original:</h3>
+                ${createMatrixHTML(matrix)}
+                <p style="text-align: center; margin-top: 15px; color: #666;">
+                    Esta es nuestra matriz A de 3×3 con los valores que ingresaste.
+                </p>
             </div>
-        `;
-    }
-    
-    if (n === 2) {
-        return `
-            <div style="font-family: monospace; font-size: 14px;">
-                <h3>Método de Cofactores para matriz 2x2:</h3>
-                <p><strong>Matriz:</strong></p>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    [${matrix[0][0]}  ${matrix[0][1]}]<br>
-                    [${matrix[1][0]}  ${matrix[1][1]}]
-                </div>
-                <p><strong>Fórmula:</strong> det(A) = a₁₁×a₂₂ - a₁₂×a₂₁</p>
-                <div style="background: #e8f0fe; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                    det(A) = ${matrix[0][0]} × ${matrix[1][1]} - ${matrix[0][1]} × ${matrix[1][0]}<br>
-                    det(A) = ${matrix[0][0] * matrix[1][1]} - ${matrix[0][1] * matrix[1][0]}<br>
-                    <strong>det(A) = ${matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]}</strong>
-                </div>
-            </div>
-        `;
-    }
-    
-    let html = `
-        <div style="font-family: monospace; font-size: 14px;">
-            <h3>Método de Cofactores para matriz ${n}x${n}:</h3>
-            <p><strong>Matriz original:</strong></p>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
-    `;
-    
-    // Mostrar matriz original
-    for (let i = 0; i < n; i++) {
-        html += '[';
-        for (let j = 0; j < n; j++) {
-            html += matrix[i][j];
-            if (j < n - 1) html += '  ';
-        }
-        html += ']<br>';
-    }
-    html += '</div>';
-    
-    html += '<p><strong>Expandimos por la primera fila:</strong></p>';
-    html += '<div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 10px 0;">';
-    html += 'det(A) = ';
-    
-    let totalDet = 0;
-    for (let j = 0; j < n; j++) {
-        const sign = j % 2 === 0 ? '+' : '-';
-        const element = matrix[0][j];
-        
-        if (j > 0) html += ' ';
-        if (element !== 0) {
-            html += `${sign} ${Math.abs(element)} × M₁${j+1}`;
-            
-            // Calcular menor
-            const minor = getMinor(matrix, 0, j);
-            const minorDet = calculateCofactors(minor);
-            const cofactor = Math.pow(-1, j) * minorDet;
-            
-            totalDet += element * cofactor;
-        }
-    }
-    html += '</div>';
-    
-    // Mostrar menores
-    html += '<p><strong>Calculando los menores:</strong></p>';
-    for (let j = 0; j < n; j++) {
-        if (matrix[0][j] !== 0) {
-            const minor = getMinor(matrix, 0, j);
-            const minorDet = calculateCofactors(minor);
-            const sign = j % 2 === 0 ? '+' : '-';
-            
-            html += `<div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin: 5px 0;">`;
-            html += `<strong>M₁${j+1} (menor ${j+1}):</strong><br>`;
-            
-            // Mostrar menor
-            for (let i = 0; i < minor.length; i++) {
-                html += '[';
-                for (let k = 0; k < minor[i].length; k++) {
-                    html += minor[i][k];
-                    if (k < minor[i].length - 1) html += '  ';
-                }
-                html += ']<br>';
-            }
-            html += `det(M₁${j+1}) = ${minorDet}<br>`;
-            html += `Cofactor C₁${j+1} = ${sign}${minorDet} = ${Math.pow(-1, j) * minorDet}`;
-            html += '</div>';
-        }
-    }
-    
-    // Resultado final
-    html += '<p><strong>Cálculo final:</strong></p>';
-    html += '<div style="background: #e8f0fe; padding: 15px; border-radius: 8px; margin: 10px 0;">';
-    html += 'det(A) = ';
-    let calculation = '';
-    for (let j = 0; j < n; j++) {
-        if (matrix[0][j] !== 0) {
-            const minor = getMinor(matrix, 0, j);
-            const minorDet = calculateCofactors(minor);
-            const cofactor = Math.pow(-1, j) * minorDet;
-            
-            if (calculation !== '') calculation += ' + ';
-            calculation += `${matrix[0][j]} × (${cofactor})`;
-        }
-    }
-    html += calculation + '<br>';
-    html += `<strong>det(A) = ${totalDet}</strong>`;
-    html += '</div>';
-    
-    html += '</div>';
-    return html;
-}
 
-// Generar pasos para Reducción por filas
-function generateRowReductionSteps(matrix) {
-    const n = matrix.length;
-    const mat = matrix.map(row => [...row]); // Copia de la matriz
-    let det = 1;
-    let steps = [];
-    
-    let html = `
-        <div style="font-family: monospace; font-size: 14px;">
-            <h3>Método de Reducción por Filas para matriz ${n}x${n}:</h3>
-            <p><strong>Matriz original:</strong></p>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
-    `;
-    
-    // Mostrar matriz original
-    for (let i = 0; i < n; i++) {
-        html += '[';
-        for (let j = 0; j < n; j++) {
-            html += mat[i][j].toString().padStart(6);
-        }
-        html += ' ]<br>';
-    }
-    html += '</div>';
-    
-    html += '<p><strong>Proceso de eliminación:</strong></p>';
-    
-    for (let i = 0; i < n; i++) {
-        // Buscar pivote
-        let maxRow = i;
-        for (let k = i + 1; k < n; k++) {
-            if (Math.abs(mat[k][i]) > Math.abs(mat[maxRow][i])) {
-                maxRow = k;
-            }
-        }
-        
-        // Intercambiar filas si es necesario
-        if (maxRow !== i) {
-            [mat[i], mat[maxRow]] = [mat[maxRow], mat[i]];
-            det *= -1;
-            
-            html += `<div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin: 5px 0;">`;
-            html += `<strong>Paso ${i + 1}a:</strong> Intercambiar filas ${i + 1} y ${maxRow + 1} (det × -1)<br>`;
-            html += `Determinante actual: det × (-1) = ${det > 0 ? '+' : ''}${det !== 1 && det !== -1 ? Math.abs(det) : ''}det<br>`;
-            
-            // Mostrar matriz después del intercambio
-            for (let row = 0; row < n; row++) {
-                html += '[';
-                for (let col = 0; col < n; col++) {
-                    html += mat[row][col].toString().padStart(6);
-                }
-                html += ' ]<br>';
-            }
-            html += '</div>';
-        }
-        
-        // Verificar si el pivote es cero
-        if (Math.abs(mat[i][i]) < 1e-10) {
-            html += `<div style="background: #f8d7da; padding: 10px; border-radius: 8px; margin: 5px 0;">`;
-            html += `<strong>Pivote en posición (${i + 1}, ${i + 1}) es cero!</strong><br>`;
-            html += `Por lo tanto, det(A) = 0`;
-            html += '</div>';
-            html += '</div>';
-            return html;
-        }
-        
-        // Guardar el pivote para el determinante
-        const pivot = mat[i][i];
-        det *= pivot;
-        
-        html += `<div style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin: 5px 0;">`;
-        html += `<strong>Paso ${i + 1}b:</strong> Pivote = ${pivot.toFixed(4)}<br>`;
-        html += `Determinante actual: det × ${pivot.toFixed(4)} = ${det.toFixed(4)}<br>`;
-        html += `Eliminar elementos debajo del pivote:`;
-        
-        // Eliminación hacia adelante
-        let hasElimination = false;
-        for (let k = i + 1; k < n; k++) {
-            if (Math.abs(mat[k][i]) > 1e-10) {
-                hasElimination = true;
-                const factor = mat[k][i] / mat[i][i];
-                html += `<br>F${k + 1} → F${k + 1} - (${factor.toFixed(4)}) × F${i + 1}`;
+            <div style="background: #fff3e0; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #ff9800;">
+                <h3 style="color: #e65100; margin-top: 0;">🔄 Paso 1: Extensión de la Matriz</h3>
+                <p><strong>Explicación:</strong> Para aplicar Sarrus, copiamos las dos primeras columnas al lado derecho de la matriz.</p>
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; font-family: monospace; font-size: 18px; border: 2px dashed #ff9800;">
+                    <div style="display: inline-block;">
+                        ${matrix[0][0]} &nbsp;&nbsp; ${matrix[0][1]} &nbsp;&nbsp; ${matrix[0][2]} &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color: #ff9800; font-weight: bold;">${matrix[0][0]} &nbsp;&nbsp; ${matrix[0][1]}</span><br>
+                        ${matrix[1][0]} &nbsp;&nbsp; ${matrix[1][1]} &nbsp;&nbsp; ${matrix[1][2]} &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color: #ff9800; font-weight: bold;">${matrix[1][0]} &nbsp;&nbsp; ${matrix[1][1]}</span><br>
+                        ${matrix[2][0]} &nbsp;&nbsp; ${matrix[2][1]} &nbsp;&nbsp; ${matrix[2][2]} &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color: #ff9800; font-weight: bold;">${matrix[2][0]} &nbsp;&nbsp; ${matrix[2][1]}</span>
+                    </div>
+                </div>
+                <p style="color: #666; font-style: italic;">Las columnas en naranja son las repetidas para facilitar el cálculo.</p>
+            </div>
+
+            <div style="background: #e8f5e8; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #4caf50;">
+                <h3 style="color: #2e7d32; margin-top: 0;">➕ Paso 2: Diagonales Principales (↘)</h3>
+                <p><strong>Explicación:</strong> Calculamos los productos de las tres diagonales que van de arriba-izquierda a abajo-derecha.</p>
                 
-                for (let j = i; j < n; j++) {
-                    mat[k][j] -= factor * mat[i][j];
-                }
-            }
-        }
-        
-        if (!hasElimination) {
-            html += '<br>No hay elementos que eliminar.';
-        }
-        
-        html += '<br><br>Matriz resultante:<br>';
-        for (let row = 0; row < n; row++) {
-            html += '[';
-            for (let col = 0; col < n; col++) {
-                const val = Math.abs(mat[row][col]) < 1e-10 ? 0 : mat[row][col];
-                html += val.toFixed(2).padStart(8);
-            }
-            html += ' ]<br>';
-        }
-        html += '</div>';
-    }
-    
-    // Resultado final
-    const finalDet = Math.round(det * 1000000) / 1000000;
-    html += '<p><strong>Resultado final:</strong></p>';
-    html += '<div style="background: #e8f0fe; padding: 15px; border-radius: 8px; margin: 10px 0;">';
-    html += 'La matriz está en forma triangular superior.<br>';
-    html += 'El determinante es el producto de los elementos de la diagonal principal<br>';
-    html += 'multiplicado por el factor de intercambios de filas.<br><br>';
-    html += `<strong>det(A) = ${finalDet}</strong>`;
-    html += '</div>';
-    
-    html += '</div>';
-    return html;
-}
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #2e7d32; margin-top: 0;">🔹 Primera diagonal principal:</h4>
+                    <p style="margin: 10px 0; font-size: 18px;">
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[0][0]}</span> × 
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[1][1]}</span> × 
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[2][2]}</span> = 
+                        <strong style="color: #2e7d32;">${pos1}</strong>
+                    </p>
+                    <p style="color: #666; font-size: 14px;">Elementos en posiciones (0,0), (1,1), (2,2)</p>
+                </div>
 
-// Función para renderizar método
-function renderMethod(method) {
-    contentArea.innerHTML = '';
-    currentMethod = method;
-    
-    // Actualizar tamaño de matriz según el método
-    if (method === 'Sarrus') {
-        matrixSize = 3;
-    }
-    
-    const methodTitle = document.createElement('h2');
-    methodTitle.textContent = `Método: ${method}`;
-    methodTitle.style.cssText = `
-        color: #2c3e50;
-        margin-bottom: 30px;
-        font-size: 28px;
-        font-weight: 600;
-    `;
-    
-    contentArea.appendChild(methodTitle);
-    contentArea.appendChild(createSizeSelector());
-    contentArea.appendChild(createActionButtons());
-    
-    renderMatrix();
-}
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #2e7d32; margin-top: 0;">🔹 Segunda diagonal principal:</h4>
+                    <p style="margin: 10px 0; font-size: 18px;">
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[0][1]}</span> × 
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[1][2]}</span> × 
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[2][0]}</span> = 
+                        <strong style="color: #2e7d32;">${pos2}</strong>
+                    </p>
+                    <p style="color: #666; font-size: 14px;">Elementos en posiciones (0,1), (1,2), (2,0) - usando extensión</p>
+                </div>
 
-// Event listeners para botones de método
-Object.keys(methodButtons).forEach(method => {
-    methodButtons[method].addEventListener('click', () => {
-        // Actualizar botón activo
-        Object.values(methodButtons).forEach(btn => {
-            btn.style.background = '#e8f0fe';
-            btn.style.color = '#5f6368';
-            btn.dataset.active = 'false';
-        });
-        
-        methodButtons[method].style.background = '#4285f4';
-        methodButtons[method].style.color = 'white';
-        methodButtons[method].dataset.active = 'true';
-        
-        renderMethod(method);
-    });
-});
-
-// Inicializar
-leftPanel.appendChild(title);
-rightPanel.appendChild(contentArea);
-mainContainer.appendChild(leftPanel);
-mainContainer.appendChild(rightPanel);
-determinantesContainer.appendChild(mainContainer);
-
-// Renderizar método inicial
-methodButtons['Sarrus'].dataset.active = 'true';
-renderMethod('Sarrus');
+                <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #2e7d32; margin-top: 0;">🔹 Tercera diagonal principal:</h4>
+                    <p style="margin: 10px 0; font-size: 18px;">
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[0][2]}</span> × 
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${matrix[1][0]}</span> × 
+                        <span style="background: #c8e6c9; padding: 3px 8px; border-
