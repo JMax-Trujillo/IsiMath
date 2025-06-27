@@ -1,539 +1,692 @@
-// screens/matrix/calculadora.js
-document.addEventListener('DOMContentLoaded', function() {
-    const calculadoraBasicaContainer = document.getElementById("calculadora-basica"); 
-    let currentMatrices = {}; 
-    let matrixCounter = 0; 
-    let currentOperation = 'sum'; 
+// Limpiar el contenedor
+const container = document.getElementById('calculadora-basica');
+container.textContent = '';
 
-    if (calculadoraBasicaContainer) {
-        calculadoraBasicaContainer.innerHTML = ""; 
+// Crear estructura principal
+const mainContainer = document.createElement('div');
+mainContainer.style.cssText = `
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8f9fa;
+`;
 
-        const contenedorPrincipal = document.createElement("div");
-        contenedorPrincipal.classList.add("calculadora-basica-content");
+// Panel izquierdo - Navegación
+const leftPanel = document.createElement('div');
+leftPanel.style.cssText = `
+    width: 280px;
+    background: white;
+    border-right: 1px solid #e9ecef;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+`;
 
-        const title = document.createElement("h2");
-        title.textContent = "Matrices y Álgebra Lineal";
-        contenedorPrincipal.appendChild(title);
+// Título
+const title = document.createElement('h2');
+title.textContent = 'Calculadora de Matrices';
+title.style.cssText = `
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: 600;
+`;
 
-        const matrixOperationSubButtonsContainer = document.createElement("div");
-        matrixOperationSubButtonsContainer.classList.add("operation-buttons-container");
+// Botones de operación
+const operations = ['Suma', 'Resta', 'Producto', 'Traspuesta'];
+const operationButtons = {};
 
-        const sumBtn = createOperationSubButton("Suma", "sum");
-        const restBtn = createOperationSubButton("Resta", "resta");
-        const prodBtn = createOperationSubButton("Producto", "producto");
-        const transBtn = createOperationSubButton("Transpuesta", "transpuesta");
-
-        matrixOperationSubButtonsContainer.appendChild(sumBtn);
-        matrixOperationSubButtonsContainer.appendChild(restBtn);
-        matrixOperationSubButtonsContainer.appendChild(prodBtn);
-        matrixOperationSubButtonsContainer.appendChild(transBtn);
-
-        contenedorPrincipal.appendChild(matrixOperationSubButtonsContainer);
-
-        const matrixDimensionSection = document.createElement("div");
-        matrixDimensionSection.classList.add("matrix-dimension-section");
-        contenedorPrincipal.appendChild(matrixDimensionSection);
-
-        const matricesDisplaySection = document.createElement("div");
-        matricesDisplaySection.classList.add("matrices-display-section");
-        contenedorPrincipal.appendChild(matricesDisplaySection);
-
-        const errorMessageDiv = document.createElement("div");
-        errorMessageDiv.classList.add("error-message");
-        contenedorPrincipal.appendChild(errorMessageDiv);
-
-        const addMatrixButton = document.createElement("button");
-        addMatrixButton.textContent = "Añadir otra matriz";
-        addMatrixButton.classList.add("add-matrix-button");
-        addMatrixButton.style.display = 'none'; 
-        contenedorPrincipal.appendChild(addMatrixButton);
-
-        const performOperationButton = document.createElement("button");
-        performOperationButton.textContent = "Resolver";
-        performOperationButton.classList.add("perform-operation-button");
-        performOperationButton.style.display = 'none'; 
-        contenedorPrincipal.appendChild(performOperationButton);
-
-        const matrixResultSection = document.createElement("div");
-        matrixResultSection.classList.add("matrix-result-container");
-        matrixResultSection.style.display = 'none';
-        contenedorPrincipal.appendChild(matrixResultSection);
-
-        const lightbulbIcon = document.createElement("div");
-        lightbulbIcon.classList.add("lightbulb-icon");
-        lightbulbIcon.innerHTML = '&#128161;'; 
-        contenedorPrincipal.appendChild(lightbulbIcon);
-
-        calculadoraBasicaContainer.appendChild(contenedorPrincipal);
-
-        function createOperationSubButton(text, id) {
-            const button = document.createElement("button");
-            button.textContent = text;
-            button.classList.add("calculator-button");
-            button.dataset.operation = id;
-            button.addEventListener('click', () => {
-                matrixOperationSubButtonsContainer.querySelectorAll('.calculator-button').forEach(btn => btn.classList.remove('active-operation'));
-                button.classList.add('active-operation');
-                currentOperation = id; 
-                clearAllMatrices(); 
-                renderMatrixInputs(); 
-                updateButtonVisibility();
-                errorMessageDiv.textContent = ''; 
-                matrixResultSection.style.display = 'none'; 
-                matrixResultSection.innerHTML = ''; 
-            });
-            return button;
+operations.forEach((op, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = op;
+    btn.style.cssText = `
+        width: 100%;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: ${index === 0 ? '#4285f4' : '#e8f0fe'};
+        color: ${index === 0 ? 'white' : '#5f6368'};
+    `;
+    
+    btn.addEventListener('mouseenter', () => {
+        if (btn.dataset.active !== 'true') {
+            btn.style.background = '#e8f0fe';
+            btn.style.color = '#4285f4';
         }
-
-        function createMatrixDimensionInputs(matrixLabel, matrixId) {
-            const matrixInputGroup = document.createElement("div");
-            matrixInputGroup.classList.add("matrix-input-group");
-            matrixInputGroup.dataset.matrixId = matrixId; 
-
-            const label = document.createElement("label");
-            label.textContent = matrixLabel;
-            matrixInputGroup.appendChild(label);
-
-            const filasSpan = document.createElement("span");
-            filasSpan.textContent = "filas:";
-            matrixInputGroup.appendChild(filasSpan);
-            const inputFilas = document.createElement("input");
-            inputFilas.type = "number";
-            inputFilas.min = "1";
-            inputFilas.placeholder = "0";
-            inputFilas.classList.add("matrix-dimension-input", "rows-input");
-            matrixInputGroup.appendChild(inputFilas);
-
-            const columnasSpan = document.createElement("span");
-            columnasSpan.textContent = "Columnas:";
-            matrixInputGroup.appendChild(columnasSpan);
-            const inputColumnas = document.createElement("input");
-            inputColumnas.type = "number";
-            inputColumnas.min = "1";
-            inputColumnas.placeholder = "0";
-            inputColumnas.classList.add("matrix-dimension-input", "cols-input");
-            matrixInputGroup.appendChild(inputColumnas);
-
-            const matrixActionButtons = document.createElement("div");
-            matrixActionButtons.classList.add("matrix-action-buttons");
-
-            const hacerBtn = document.createElement("button");
-            hacerBtn.textContent = "Hacer";
-            hacerBtn.classList.add("action-button", "hacer");
-            hacerBtn.addEventListener('click', () => {
-                const rows = parseInt(inputFilas.value);
-                const cols = parseInt(inputColumnas.value);
-                if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
-                    errorMessageDiv.textContent = "Por favor, ingresa dimensiones válidas (números mayores a 0).";
-                    return;
-                }
-                errorMessageDiv.textContent = ''; 
-                generateMatrixEditor(matrixId, matrixLabel, rows, cols); 
-
-                hacerBtn.style.display = 'none';
-                mostrarBtn.style.display = 'none'; 
-                ocultarBtn.style.display = 'inline-block';
-                updateButtonVisibility();
-            });
-            matrixActionButtons.appendChild(hacerBtn);
-
-            const mostrarBtn = document.createElement("button");
-            mostrarBtn.textContent = "Mostrar";
-            mostrarBtn.classList.add("action-button", "show");
-            mostrarBtn.style.display = 'none'; 
-            mostrarBtn.addEventListener('click', () => {
-                const editorContainer = document.getElementById(`editor-container-${matrixId}`);
-                if (editorContainer) {
-                    editorContainer.classList.remove('hidden');
-                    mostrarBtn.style.display = 'none';
-                    ocultarBtn.style.display = 'inline-block';
-                }
-            });
-            matrixActionButtons.appendChild(mostrarBtn);
-
-            const ocultarBtn = document.createElement("button");
-            ocultarBtn.textContent = "Ocultar";
-            ocultarBtn.classList.add("action-button", "hide");
-            ocultarBtn.style.display = 'none'; 
-            ocultarBtn.addEventListener('click', () => {
-                const editorContainer = document.getElementById(`editor-container-${matrixId}`);
-                if (editorContainer) {
-                    editorContainer.classList.add('hidden');
-                    ocultarBtn.style.display = 'none';
-                    mostrarBtn.style.display = 'inline-block';
-                }
-            });
-            matrixActionButtons.appendChild(ocultarBtn);
-
-            matrixInputGroup.appendChild(matrixActionButtons);
-
-            return matrixInputGroup;
+    });
+    
+    btn.addEventListener('mouseleave', () => {
+        if (btn.dataset.active !== 'true') {
+            btn.style.background = '#e8f0fe';
+            btn.style.color = '#5f6368';
         }
+    });
+    
+    operationButtons[op] = btn;
+    leftPanel.appendChild(btn);
+});
 
-        function generateMatrixEditor(matrixId, matrixLabel, rows, cols) {
-            let matrixData;
-            if (currentMatrices[matrixId] && currentMatrices[matrixId].rows === rows && currentMatrices[matrixId].cols === cols) {
-                matrixData = currentMatrices[matrixId].data; 
-            } else {
-                matrixData = Array(rows).fill(0).map(() => Array(cols).fill(0));
-            }
+// Panel derecho - Contenido
+const rightPanel = document.createElement('div');
+rightPanel.style.cssText = `
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #f8f9fa;
+`;
 
-            let matrixContainer = document.getElementById(`editor-container-${matrixId}`);
-            if (!matrixContainer) {
-                matrixContainer = document.createElement("div");
-                matrixContainer.classList.add("matrix-container");
-                matrixContainer.id = `editor-container-${matrixId}`;
-                matricesDisplaySection.appendChild(matrixContainer);
-            } else {
-                matrixContainer.innerHTML = ''; 
-            }
+// Área de contenido
+const contentArea = document.createElement('div');
+contentArea.style.cssText = `
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    min-height: 400px;
+`;
 
-            const title = document.createElement("h4");
-            title.classList.add("matrix-title");
-            title.textContent = `Matriz ${matrixLabel} (${rows}x${cols}):`;
-            matrixContainer.appendChild(title);
+// Variables globales
+let currentOperation = 'Suma';
+let matrices = {};
+let matrixCounter = 0;
 
-            const matrixEditorActions = document.createElement("div");
-            matrixEditorActions.classList.add("matrix-editor-actions");
-
-            const minimizeBtn = document.createElement("button");
-            minimizeBtn.textContent = "Minimizar";
-            minimizeBtn.classList.add("action-button", "hide"); 
-            minimizeBtn.addEventListener('click', () => {
-                matrixContainer.classList.add('hidden');
-                const matrixInputGroup = document.querySelector(`[data-matrix-id="${matrixId}"]`);
-                if (matrixInputGroup) {
-                    matrixInputGroup.querySelector('.action-button.hide').style.display = 'none';
-                    matrixInputGroup.querySelector('.action-button.show').style.display = 'inline-block';
-                    matrixInputGroup.querySelector('.action-button.hacer').style.display = 'none'; 
-                }
-            });
-            matrixEditorActions.appendChild(minimizeBtn);
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Eliminar";
-            deleteBtn.classList.add("action-button", "delete");
-            deleteBtn.addEventListener('click', () => {
-                matrixContainer.remove();
-                const inputGroupToRemove = document.querySelector(`[data-matrix-id="${matrixId}"]`);
-                if (inputGroupToRemove) {
-                    inputGroupToRemove.remove();
-                }
-                delete currentMatrices[matrixId]; 
-                updateButtonVisibility();
-                errorMessageDiv.textContent = ''; 
-                matrixResultSection.style.display = 'none'; 
-                matrixResultSection.innerHTML = ''; 
-            });
-            matrixEditorActions.appendChild(deleteBtn);
-
-            matrixContainer.appendChild(matrixEditorActions);
-
-            const matrixEditorDiv = document.createElement("div");
-            matrixEditorDiv.classList.add("matrix-editor");
-            matrixEditorDiv.style.gridTemplateColumns = `repeat(${cols}, minmax(55px, 1fr))`; 
-
+// Función para crear sección de matriz
+function createMatrixSection(id, canDelete = true) {
+    const section = document.createElement('div');
+    section.style.cssText = `
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    `;
+    
+    const header = document.createElement('div');
+    header.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    `;
+    
+    const matrixLabel = document.createElement('h3');
+    matrixLabel.textContent = `Matriz ${id}`;
+    matrixLabel.style.cssText = `
+        color: #2c3e50;
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+    `;
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+        display: flex;
+        gap: 10px;
+    `;
+    
+    if (canDelete) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Eliminar';
+        deleteBtn.style.cssText = `
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        `;
+        deleteBtn.addEventListener('mouseenter', () => deleteBtn.style.background = '#c82333');
+        deleteBtn.addEventListener('mouseleave', () => deleteBtn.style.background = '#dc3545');
+        deleteBtn.addEventListener('click', () => {
+            delete matrices[id];
+            section.remove();
+        });
+        buttonContainer.appendChild(deleteBtn);
+    }
+    
+    header.appendChild(matrixLabel);
+    header.appendChild(buttonContainer);
+    
+    const inputContainer = document.createElement('div');
+    inputContainer.style.cssText = `
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 20px;
+    `;
+    
+    const rowsContainer = document.createElement('div');
+    rowsContainer.style.cssText = `flex: 1;`;
+    const rowsLabel = document.createElement('label');
+    rowsLabel.textContent = 'Filas:';
+    rowsLabel.style.cssText = `
+        display: block;
+        margin-bottom: 8px;
+        color: #5f6368;
+        font-weight: 500;
+    `;
+    const rowsInput = document.createElement('input');
+    rowsInput.type = 'number';
+    rowsInput.min = '1';
+    rowsInput.max = '10';
+    rowsInput.value = '2';
+    rowsInput.style.cssText = `
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+    `;
+    rowsInput.addEventListener('focus', () => rowsInput.style.borderColor = '#4285f4');
+    rowsInput.addEventListener('blur', () => rowsInput.style.borderColor = '#e9ecef');
+    
+    const colsContainer = document.createElement('div');
+    colsContainer.style.cssText = `flex: 1;`;
+    const colsLabel = document.createElement('label');
+    colsLabel.textContent = 'Columnas:';
+    colsLabel.style.cssText = `
+        display: block;
+        margin-bottom: 8px;
+        color: #5f6368;
+        font-weight: 500;
+    `;
+    const colsInput = document.createElement('input');
+    colsInput.type = 'number';
+    colsInput.min = '1';
+    colsInput.max = '10';
+    colsInput.value = '2';
+    colsInput.style.cssText = `
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+    `;
+    colsInput.addEventListener('focus', () => colsInput.style.borderColor = '#4285f4');
+    colsInput.addEventListener('blur', () => colsInput.style.borderColor = '#e9ecef');
+    
+    const modifyBtn = document.createElement('button');
+    modifyBtn.textContent = 'Modificar';
+    modifyBtn.style.cssText = `
+        background: #4285f4;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: background 0.2s;
+        white-space: nowrap;
+    `;
+    modifyBtn.addEventListener('mouseenter', () => modifyBtn.style.background = '#3367d6');
+    modifyBtn.addEventListener('mouseleave', () => modifyBtn.style.background = '#4285f4');
+    
+    rowsContainer.appendChild(rowsLabel);
+    rowsContainer.appendChild(rowsInput);
+    colsContainer.appendChild(colsLabel);
+    colsContainer.appendChild(colsInput);
+    
+    inputContainer.appendChild(rowsContainer);
+    inputContainer.appendChild(colsContainer);
+    inputContainer.appendChild(modifyBtn);
+    
+    const matrixContainer = document.createElement('div');
+    matrixContainer.style.cssText = `
+        margin-top: 20px;
+        display: none;
+    `;
+    
+    let matrixVisible = false;
+    
+    modifyBtn.addEventListener('click', () => {
+        const rows = parseInt(rowsInput.value);
+        const cols = parseInt(colsInput.value);
+        
+        if (rows < 1 || cols < 1 || rows > 10 || cols > 10) {
+            alert('Las dimensiones deben estar entre 1 y 10');
+            return;
+        }
+        
+        if (!matrixVisible) {
+            // Mostrar matriz
+            matrixContainer.innerHTML = '';
+            matrixContainer.style.display = 'block';
+            
+            const grid = document.createElement('div');
+            grid.style.cssText = `
+                display: grid;
+                grid-template-columns: repeat(${cols}, 1fr);
+                gap: 10px;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            `;
+            
+            const inputs = [];
             for (let i = 0; i < rows; i++) {
+                inputs[i] = [];
                 for (let j = 0; j < cols; j++) {
-                    const input = document.createElement("input");
-                    input.type = "number";
-                    input.value = (matrixData[i] && typeof matrixData[i][j] === 'number') ? matrixData[i][j] : 0;
-                    input.dataset.row = i;
-                    input.dataset.col = j;
-                    input.addEventListener('change', (e) => {
-                        const val = parseFloat(e.target.value);
-                        currentMatrices[matrixId].data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = isNaN(val) ? 0 : val;
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.value = '0';
+                    input.style.cssText = `
+                        width: 100%;
+                        padding: 12px;
+                        border: 2px solid #e9ecef;
+                        border-radius: 8px;
+                        text-align: center;
+                        font-size: 16px;
+                        font-weight: 500;
+                        transition: all 0.2s;
+                    `;
+                    input.addEventListener('focus', () => {
+                        input.style.borderColor = '#4285f4';
+                        input.style.boxShadow = '0 0 0 3px rgba(66, 133, 244, 0.1)';
                     });
-                    
-                    // --- MODIFICACIÓN AQUÍ ---
-                    input.addEventListener('focus', (e) => {
-                        e.target.select(); // Selecciona todo el texto al enfocar
+                    input.addEventListener('blur', () => {
+                        input.style.borderColor = '#e9ecef';
+                        input.style.boxShadow = 'none';
                     });
-                    // --- FIN MODIFICACIÓN ---
-
-                    matrixEditorDiv.appendChild(input);
+                    inputs[i][j] = input;
+                    grid.appendChild(input);
                 }
-            }
-            matrixContainer.appendChild(matrixEditorDiv);
-
-            currentMatrices[matrixId] = { id: matrixId, label: matrixLabel, rows, cols, data: matrixData };
-
-            matrixContainer.classList.remove('hidden'); 
-        }
-
-        function renderMatrixInputs() {
-            clearAllMatrices(); 
-
-            if (currentOperation === 'sum' || currentOperation === 'resta' || currentOperation === 'producto') {
-                matrixCounter = 0; 
-                const matrixA = createMatrixDimensionInputs("A", `matrix-${matrixCounter++}`);
-                const matrixB = createMatrixDimensionInputs("B", `matrix-${matrixCounter++}`);
-                matrixDimensionSection.appendChild(matrixA);
-                matrixDimensionSection.appendChild(matrixB);
-            } else if (currentOperation === 'transpuesta') {
-                matrixCounter = 0; 
-                const singleMatrix = createMatrixDimensionInputs("A", `matrix-${matrixCounter++}`);
-                matrixDimensionSection.appendChild(singleMatrix);
-            }
-            updateButtonVisibility();
-        }
-
-        function updateButtonVisibility() {
-            const numMatricesMade = Object.keys(currentMatrices).length;
-            const matrixLabelsInUse = Object.values(currentMatrices).map(m => m.label);
-
-            if ((currentOperation === 'sum' || currentOperation === 'resta' || currentOperation === 'producto')) {
-                let nextCharCode = 'A'.charCodeAt(0);
-                while (matrixLabelsInUse.includes(String.fromCharCode(nextCharCode)) && nextCharCode <= 'Z'.charCodeAt(0)) {
-                    nextCharCode++;
-                }
-
-                if (nextCharCode > 'Z'.charCodeAt(0)) {
-                    addMatrixButton.style.display = 'block';
-                    addMatrixButton.disabled = true;
-                } else if (currentOperation === 'resta' || currentOperation === 'producto') {
-                    addMatrixButton.style.display = 'block';
-                    addMatrixButton.disabled = (numMatricesMade >= 2);
-                } else { 
-                    addMatrixButton.style.display = 'block';
-                    addMatrixButton.disabled = false;
-                }
-            } else {
-                addMatrixButton.style.display = 'none';
             }
             
-            let showPerformButton = false;
-            if (currentOperation === 'sum' && numMatricesMade >= 2) {
-                const allMatricesAreMade = Object.values(currentMatrices).every(m => m.data && m.data.length > 0 && m.data[0].length > 0);
-                showPerformButton = allMatricesAreMade;
-            } else if ((currentOperation === 'resta' || currentOperation === 'producto') && numMatricesMade === 2) {
-                const allMatricesAreMade = Object.values(currentMatrices).every(m => m.data && m.data.length > 0 && m.data[0].length > 0);
-                showPerformButton = allMatricesAreMade;
-            } else if (currentOperation === 'transpuesta' && numMatricesMade === 1) {
-                const allMatricesAreMade = Object.values(currentMatrices).every(m => m.data && m.data.length > 0 && m.data[0].length > 0);
-                showPerformButton = allMatricesAreMade;
-            }
-            performOperationButton.style.display = showPerformButton ? 'block' : 'none';
-
-            Object.keys(currentMatrices).forEach(matrixId => {
-                const matrixInputGroup = document.querySelector(`[data-matrix-id="${matrixId}"]`);
-                if (matrixInputGroup) {
-                    const hacerBtn = matrixInputGroup.querySelector('.action-button.hacer');
-                    if (currentMatrices[matrixId].data) {
-                        hacerBtn.style.display = 'none';
-                        const mostrarBtn = matrixInputGroup.querySelector('.action-button.show');
-                        const ocultarBtn = matrixInputGroup.querySelector('.action-button.hide');
-                        if (document.getElementById(`editor-container-${matrixId}`).classList.contains('hidden')) {
-                            mostrarBtn.style.display = 'inline-block';
-                            ocultarBtn.style.display = 'none';
-                        } else {
-                            mostrarBtn.style.display = 'none';
-                            ocultarBtn.style.display = 'inline-block';
-                        }
-                    } else {
-                        hacerBtn.style.display = 'inline-block';
-                        matrixInputGroup.querySelector('.action-button.show').style.display = 'none';
-                        matrixInputGroup.querySelector('.action-button.hide').style.display = 'none';
-                    }
-                }
-            });
+            matrixContainer.appendChild(grid);
+            matrices[id] = { rows, cols, inputs };
+            matrixVisible = true;
+        } else {
+            // Ocultar matriz
+            matrixContainer.style.display = 'none';
+            matrixVisible = false;
         }
+    });
+    
+    section.appendChild(header);
+    section.appendChild(inputContainer);
+    section.appendChild(matrixContainer);
+    
+    return section;
+}
 
-        function clearAllMatrices() {
-            currentMatrices = {};
-            matrixCounter = 0;
-            matricesDisplaySection.innerHTML = '';
-            matrixDimensionSection.innerHTML = ''; 
-            errorMessageDiv.textContent = '';
-            matrixResultSection.style.display = 'none';
-            matrixResultSection.innerHTML = ''; 
-            addMatrixButton.style.display = 'none';
-            performOperationButton.style.display = 'none';
-        }
+// Función para crear botón de añadir matriz
+function createAddMatrixButton() {
+    const btn = document.createElement('button');
+    btn.textContent = 'Añadir otra matriz';
+    btn.style.cssText = `
+        background: #34a853;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: background 0.2s;
+        margin-bottom: 30px;
+    `;
+    btn.addEventListener('mouseenter', () => btn.style.background = '#2d8c47');
+    btn.addEventListener('mouseleave', () => btn.style.background = '#34a853');
+    
+    btn.addEventListener('click', () => {
+        matrixCounter++;
+        const id = String.fromCharCode(65 + matrixCounter);
+        const section = createMatrixSection(id, true);
+        contentArea.insertBefore(section, btn);
+    });
+    
+    return btn;
+}
 
-        function displayResultMatrix(resultMatrix, titleText) {
-            matrixResultSection.innerHTML = '';
-            matrixResultSection.style.display = 'block';
+// Función para crear botón de calcular
+function createCalculateButton() {
+    const btn = document.createElement('button');
+    btn.textContent = 'Calcular';
+    btn.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 600;
+        transition: transform 0.2s;
+        margin: 20px 0;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    `;
+    btn.addEventListener('mouseenter', () => btn.style.transform = 'translateY(-2px)');
+    btn.addEventListener('mouseleave', () => btn.style.transform = 'translateY(0)');
+    
+    btn.addEventListener('click', calculate);
+    
+    return btn;
+}
 
-            const title = document.createElement("h4");
-            title.textContent = titleText;
-            matrixResultSection.appendChild(title);
-
-            const resultEditorDiv = document.createElement("div");
-            resultEditorDiv.classList.add("result-matrix-editor");
-            if (resultMatrix.length > 0) {
-                resultEditorDiv.style.gridTemplateColumns = `repeat(${resultMatrix[0].length}, auto)`;
-            }
-
-            for (let i = 0; i < resultMatrix.length; i++) {
-                for (let j = 0; j < resultMatrix[0].length; j++) {
-                    const cell = document.createElement("div");
-                    cell.textContent = resultMatrix[i][j].toFixed(2); 
-                    resultEditorDiv.appendChild(cell);
-                }
-            }
-            matrixResultSection.appendChild(resultEditorDiv);
-        }
-
-        function addMatrices(matrices) {
-            if (matrices.length === 0) return [];
-            const rows = matrices[0].length;
-            const cols = matrices[0][0].length;
-            let result = Array(rows).fill(0).map(() => Array(cols).fill(0));
-
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    for (let k = 0; k < matrices.length; k++) {
-                        result[i][j] += matrices[k][i][j];
-                    }
-                }
-            }
-            return result;
-        }
-
-        function subtractMatrices(matrixA, matrixB) {
-            const rows = matrixA.length;
-            const cols = matrixA[0].length;
-            let result = Array(rows).fill(0).map(() => Array(cols).fill(0));
-
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    result[i][j] = matrixA[i][j] - matrixB[i][j];
-                }
-            }
-            return result;
-        }
-
-        function multiplyMatrices(matrixA, matrixB) {
-            const rowsA = matrixA.length;
-            const colsA = matrixA[0].length;
-            const rowsB = matrixB.length;
-            const colsB = matrixB[0].length;
-
-            if (colsA !== rowsB) {
-                return null; 
-            }
-
-            let result = Array(rowsA).fill(0).map(() => Array(colsB).fill(0));
-
-            for (let i = 0; i < rowsA; i++) {
-                for (let j = 0; j < colsB; j++) {
-                    for (let k = 0; k < colsA; k++) {
-                        result[i][j] += matrixA[i][k] * matrixB[k][j];
-                    }
-                }
-            }
-            return result;
-        }
-
-        function transposeMatrix(matrix) {
-            const rows = matrix.length;
-            const cols = matrix[0].length;
-            let result = Array(cols).fill(0).map(() => Array(rows).fill(0));
-
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    result[j][i] = matrix[i][j];
-                }
-            }
-            return result;
-        }
-
-        matrixOperationSubButtonsContainer.querySelector(`[data-operation="sum"]`).classList.add('active-operation'); 
-        renderMatrixInputs(); 
-
-        addMatrixButton.addEventListener('click', () => {
-            if (currentOperation === 'sum' || currentOperation === 'resta' || currentOperation === 'producto') {
-                const existingLabels = Object.values(currentMatrices).map(m => m.label.charCodeAt(0));
-                let nextCharCode = 'A'.charCodeAt(0);
-
-                while (existingLabels.includes(nextCharCode) && nextCharCode <= 'Z'.charCodeAt(0)) {
-                    nextCharCode++;
-                }
-
-                if (nextCharCode > 'Z'.charCodeAt(0)) {
-                    errorMessageDiv.textContent = "Has alcanzado el número máximo de matrices (A-Z).";
-                    addMatrixButton.disabled = true;
-                    return;
-                }
-                
-                if ((currentOperation === 'resta' || currentOperation === 'producto') && Object.keys(currentMatrices).length >= 2) {
-                    errorMessageDiv.textContent = "Para Resta o Producto solo se permiten dos matrices.";
-                    addMatrixButton.disabled = true;
-                    return;
-                }
-
-                const newMatrixLabel = String.fromCharCode(nextCharCode);
-                matrixCounter++; 
-                const newMatrixInputs = createMatrixDimensionInputs(newMatrixLabel, `matrix-${matrixCounter}`);
-                matrixDimensionSection.appendChild(newMatrixInputs);
-                updateButtonVisibility(); 
-            }
-        });
-
-        performOperationButton.addEventListener('click', () => {
-            errorMessageDiv.textContent = ''; 
-            matrixResultSection.style.display = 'none'; 
-            matrixResultSection.innerHTML = ''; 
-
-            const validMatricesArray = Object.values(currentMatrices)
-                .filter(m => m.data && m.data.length > 0 && m.data[0].length > 0)
-                .sort((a, b) => a.label.localeCompare(b.label)); 
-
-            const matricesData = validMatricesArray.map(m => m.data);
-
-            if (currentOperation === 'sum') {
-                if (matricesData.length < 2) {
-                    errorMessageDiv.textContent = "Se necesitan al menos dos matrices para la suma.";
-                    return;
-                }
-                const firstMatrixDims = { rows: matricesData[0].length, cols: matricesData[0][0].length };
-                const allSameDimensions = matricesData.every(m => m.length === firstMatrixDims.rows && m[0].length === firstMatrixDims.cols);
-                if (!allSameDimensions) {
-                    errorMessageDiv.textContent = "Todas las matrices deben tener las mismas dimensiones para la suma.";
-                    return;
-                }
-                const result = addMatrices(matricesData);
-                displayResultMatrix(result, "Resultado de la Suma:");
-            } else if (currentOperation === 'resta') {
-                if (matricesData.length !== 2) {
-                    errorMessageDiv.textContent = "La resta requiere exactamente dos matrices (A y B). Por favor, asegúrate de tener solo dos y con las dimensiones hechas.";
-                    return;
-                }
-                const matrixA = matricesData[0];
-                const matrixB = matricesData[1];
-                if (matrixA.length !== matrixB.length || matrixA[0].length !== matrixB[0].length) {
-                    errorMessageDiv.textContent = "Ambas matrices deben tener las mismas dimensiones para la resta.";
-                    return;
-                }
-                const result = subtractMatrices(matrixA, matrixB);
-                displayResultMatrix(result, "Resultado de la Resta:");
-            } else if (currentOperation === 'producto') {
-                if (matricesData.length !== 2) {
-                    errorMessageDiv.textContent = "El producto requiere exactamente dos matrices (A y B). Por favor, asegúrate de tener solo dos y con las dimensiones hechas.";
-                    return;
-                }
-                const matrixA = matricesData[0];
-                const matrixB = matricesData[1];
-                if (matrixA[0].length !== matrixB.length) {
-                    errorMessageDiv.textContent = "Para el producto A x B, el número de columnas de A debe ser igual al número de filas de B.";
-                    return;
-                }
-                const result = multiplyMatrices(matrixA, matrixB);
-                if (result) {
-                    displayResultMatrix(result, "Resultado del Producto:");
-                } else {
-                    errorMessageDiv.textContent = "Error en el producto de matrices. Verifica las dimensiones.";
-                }
-            } else if (currentOperation === 'transpuesta') {
-                if (matricesData.length !== 1) {
-                    errorMessageDiv.textContent = "La transpuesta requiere exactamente una matriz.";
-                    return;
-                }
-                const matrix = matricesData[0];
-                const result = transposeMatrix(matrix);
-                displayResultMatrix(result, "Resultado de la Transpuesta:");
-            }
-        });
+// Función para mostrar resultado
+function showResult(result, operation) {
+    const existingResult = document.getElementById('result-container');
+    if (existingResult) {
+        existingResult.remove();
     }
+    
+    const resultContainer = document.createElement('div');
+    resultContainer.id = 'result-container';
+    resultContainer.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+        margin-top: 30px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    `;
+    
+    const title = document.createElement('h3');
+    title.textContent = `Resultado - ${operation}`;
+    title.style.cssText = `
+        margin: 0 0 20px 0;
+        font-size: 22px;
+        font-weight: 600;
+    `;
+    
+    const grid = document.createElement('div');
+    grid.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(${result[0].length}, 1fr);
+        gap: 12px;
+        max-width: 600px;
+        margin: 0 auto;
+    `;
+    
+    result.forEach(row => {
+        row.forEach(value => {
+            const cell = document.createElement('div');
+            cell.textContent = value;
+            cell.style.cssText = `
+                background: rgba(255, 255, 255, 0.2);
+                padding: 15px;
+                border-radius: 8px;
+                text-align: center;
+                font-size: 18px;
+                font-weight: 500;
+                backdrop-filter: blur(10px);
+            `;
+            grid.appendChild(cell);
+        });
+    });
+    
+    resultContainer.appendChild(title);
+    resultContainer.appendChild(grid);
+    contentArea.appendChild(resultContainer);
+}
+
+// Función para mostrar error
+function showError(message) {
+    const existingError = document.getElementById('error-container');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    const errorContainer = document.createElement('div');
+    errorContainer.id = 'error-container';
+    errorContainer.style.cssText = `
+        background: #dc3545;
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+    `;
+    errorContainer.textContent = message;
+    
+    contentArea.appendChild(errorContainer);
+    
+    setTimeout(() => {
+        errorContainer.remove();
+    }, 5000);
+}
+
+// Función para obtener valores de matriz
+function getMatrixValues(id) {
+    const matrix = matrices[id];
+    if (!matrix) return null;
+    
+    const values = [];
+    for (let i = 0; i < matrix.rows; i++) {
+        values[i] = [];
+        for (let j = 0; j < matrix.cols; j++) {
+            values[i][j] = parseFloat(matrix.inputs[i][j].value) || 0;
+        }
+    }
+    return values;
+}
+
+// Función para calcular
+function calculate() {
+    const existingResult = document.getElementById('result-container');
+    const existingError = document.getElementById('error-container');
+    if (existingResult) existingResult.remove();
+    if (existingError) existingError.remove();
+    
+    try {
+        let result;
+        
+        switch (currentOperation) {
+            case 'Suma':
+                result = calculateSum();
+                break;
+            case 'Resta':
+                result = calculateSubtraction();
+                break;
+            case 'Producto':
+                result = calculateProduct();
+                break;
+            case 'Traspuesta':
+                result = calculateTranspose();
+                break;
+        }
+        
+        if (result) {
+            showResult(result, currentOperation);
+        }
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+// Operaciones matemáticas
+function calculateSum() {
+    const matrixIds = Object.keys(matrices);
+    if (matrixIds.length < 2) {
+        throw new Error('Se necesitan al menos 2 matrices para sumar');
+    }
+    
+    const firstMatrix = getMatrixValues(matrixIds[0]);
+    const rows = firstMatrix.length;
+    const cols = firstMatrix[0].length;
+    
+    // Verificar dimensiones
+    for (let i = 1; i < matrixIds.length; i++) {
+        const matrix = getMatrixValues(matrixIds[i]);
+        if (matrix.length !== rows || matrix[0].length !== cols) {
+            throw new Error('Todas las matrices deben tener las mismas dimensiones para sumar');
+        }
+    }
+    
+    // Sumar matrices
+    const result = Array(rows).fill().map(() => Array(cols).fill(0));
+    
+    matrixIds.forEach(id => {
+        const matrix = getMatrixValues(id);
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                result[i][j] += matrix[i][j];
+            }
+        }
+    });
+    
+    return result;
+}
+
+function calculateSubtraction() {
+    const matrixIds = Object.keys(matrices);
+    if (matrixIds.length !== 2) {
+        throw new Error('Se necesitan exactamente 2 matrices para restar');
+    }
+    
+    const matrixA = getMatrixValues(matrixIds[0]);
+    const matrixB = getMatrixValues(matrixIds[1]);
+    
+    if (matrixA.length !== matrixB.length || matrixA[0].length !== matrixB[0].length) {
+        throw new Error('Las matrices deben tener las mismas dimensiones para restar');
+    }
+    
+    const result = Array(matrixA.length).fill().map(() => Array(matrixA[0].length).fill(0));
+    
+    for (let i = 0; i < matrixA.length; i++) {
+        for (let j = 0; j < matrixA[0].length; j++) {
+            result[i][j] = matrixA[i][j] - matrixB[i][j];
+        }
+    }
+    
+    return result;
+}
+
+function calculateProduct() {
+    const matrixIds = Object.keys(matrices);
+    if (matrixIds.length !== 2) {
+        throw new Error('Se necesitan exactamente 2 matrices para multiplicar');
+    }
+    
+    const matrixA = getMatrixValues(matrixIds[0]);
+    const matrixB = getMatrixValues(matrixIds[1]);
+    
+    if (matrixA[0].length !== matrixB.length) {
+        throw new Error('El número de columnas de la primera matriz debe ser igual al número de filas de la segunda');
+    }
+    
+    const rows = matrixA.length;
+    const cols = matrixB[0].length;
+    const result = Array(rows).fill().map(() => Array(cols).fill(0));
+    
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            for (let k = 0; k < matrixA[0].length; k++) {
+                result[i][j] += matrixA[i][k] * matrixB[k][j];
+            }
+        }
+    }
+    
+    return result;
+}
+
+function calculateTranspose() {
+    const matrixIds = Object.keys(matrices);
+    if (matrixIds.length !== 1) {
+        throw new Error('Se necesita exactamente 1 matriz para transponer');
+    }
+    
+    const matrix = getMatrixValues(matrixIds[0]);
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    
+    const result = Array(cols).fill().map(() => Array(rows).fill(0));
+    
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            result[j][i] = matrix[i][j];
+        }
+    }
+    
+    return result;
+}
+
+// Función para renderizar operación
+function renderOperation(operation) {
+    contentArea.innerHTML = '';
+    matrices = {};
+    matrixCounter = 0;
+    
+    const operationTitle = document.createElement('h2');
+    operationTitle.textContent = `Operación: ${operation}`;
+    operationTitle.style.cssText = `
+        color: #2c3e50;
+        margin-bottom: 30px;
+        font-size: 28px;
+        font-weight: 600;
+    `;
+    contentArea.appendChild(operationTitle);
+    
+    switch (operation) {
+        case 'Suma':
+            const sectionA = createMatrixSection('A', false);
+            const sectionB = createMatrixSection('B', false);
+            contentArea.appendChild(sectionA);
+            contentArea.appendChild(sectionB);
+            matrixCounter = 1;
+            contentArea.appendChild(createAddMatrixButton());
+            break;
+            
+        case 'Resta':
+        case 'Producto':
+            const sectionA2 = createMatrixSection('A', false);
+            const sectionB2 = createMatrixSection('B', false);
+            contentArea.appendChild(sectionA2);
+            contentArea.appendChild(sectionB2);
+            break;
+            
+        case 'Traspuesta':
+            const sectionA3 = createMatrixSection('A', false);
+            contentArea.appendChild(sectionA3);
+            break;
+    }
+    
+    contentArea.appendChild(createCalculateButton());
+}
+
+// Event listeners para botones de operación
+Object.keys(operationButtons).forEach(op => {
+    operationButtons[op].addEventListener('click', () => {
+        // Actualizar botón activo
+        Object.values(operationButtons).forEach(btn => {
+            btn.style.background = '#e8f0fe';
+            btn.style.color = '#5f6368';
+            btn.dataset.active = 'false';
+        });
+        
+        operationButtons[op].style.background = '#4285f4';
+        operationButtons[op].style.color = 'white';
+        operationButtons[op].dataset.active = 'true';
+        
+        currentOperation = op;
+        renderOperation(op);
+    });
 });
+
+// Inicializar
+leftPanel.appendChild(title);
+rightPanel.appendChild(contentArea);
+mainContainer.appendChild(leftPanel);
+mainContainer.appendChild(rightPanel);
+container.appendChild(mainContainer);
+
+// Renderizar operación inicial
+operationButtons['Suma'].dataset.active = 'true';
+renderOperation('Suma');
