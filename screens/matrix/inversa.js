@@ -1,592 +1,681 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Limpiar el contenedor
     const inversaContainer = document.getElementById("inversa");
-    let currentMatrix = null;
-    let selectedMethod = 'adjunta'; // Método por defecto
-    let calculationSteps = []; // Para almacenar los pasos de la resolución
+    inversaContainer.innerHTML = "";
 
-    if (inversaContainer) {
-        inversaContainer.innerHTML = ""; // Limpiar el contenido del placeholder
+    // Crear estructura principal
+    const mainContainer = document.createElement('div');
+    mainContainer.style.cssText = `
+        display: flex;
+        width: 100%;
+        height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8f9fa;
+    `;
 
-        const contenedorPrincipal = document.createElement("div");
-        contenedorPrincipal.classList.add("inversa-content");
+    // Panel izquierdo - Métodos
+    const leftPanel = document.createElement('div');
+    leftPanel.style.cssText = `
+        width: 280px;
+        background: white;
+        border-right: 1px solid #e9ecef;
+        padding: 20px;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    `;
 
-        const title = document.createElement("h2");
-        title.textContent = "Cálculo de Matriz Inversa";
-        contenedorPrincipal.appendChild(title);
+    // Título
+    const title = document.createElement('h2');
+    title.textContent = 'Cálculo de Matriz Inversa';
+    title.style.cssText = `
+        color: #2c3e50;
+        margin-bottom: 30px;
+        font-size: 24px;
+        font-weight: 600;
+    `;
 
-        // Botones de selección de método
-        const methodButtonsContainer = document.createElement("div");
-        methodButtonsContainer.classList.add("method-buttons-container");
+    // Botones de métodos
+    const methods = ['Método de Adjunta', 'Método de Gauss-Jordan'];
+    const methodButtons = {};
 
-        const adjuntaBtn = createMethodButton("Método de la Adjunta", "adjunta");
-        const gaussJordanBtn = createMethodButton("Método de Gauss-Jordan", "gauss-jordan");
-
-        methodButtonsContainer.appendChild(adjuntaBtn);
-        methodButtonsContainer.appendChild(gaussJordanBtn);
-        contenedorPrincipal.appendChild(methodButtonsContainer);
-
-        // Sección de entrada de la matriz
-        const matrixDimensionSection = document.createElement("div");
-        matrixDimensionSection.classList.add("matrix-dimension-section");
-        contenedorPrincipal.appendChild(matrixDimensionSection);
-
-        const matricesDisplaySection = document.createElement("div");
-        matricesDisplaySection.classList.add("matrices-display-section");
-        contenedorPrincipal.appendChild(matricesDisplaySection);
-
-        const errorMessageDiv = document.createElement("div");
-        errorMessageDiv.classList.add("error-message");
-        contenedorPrincipal.appendChild(errorMessageDiv);
-
-        // Botones de acción (Resolver y Ver Pasos)
-        const inversaActionButtons = document.createElement("div");
-        inversaActionButtons.classList.add("inversa-action-buttons");
-
-        const solveBtn = document.createElement("button");
-        solveBtn.textContent = "Calcular Inversa";
-        solveBtn.classList.add("main-action-button", "solve");
-        solveBtn.style.display = 'none';
-        inversaActionButtons.appendChild(solveBtn);
-
-        const viewStepsBtn = document.createElement("button");
-        viewStepsBtn.textContent = "Ver Pasos / Teoría";
-        viewStepsBtn.classList.add("main-action-button", "steps");
-        viewStepsBtn.style.display = 'none';
-        inversaActionButtons.appendChild(viewStepsBtn);
-        contenedorPrincipal.appendChild(inversaActionButtons);
-
-        // Sección de resultado
-        const inversaResultSection = document.createElement("div");
-        inversaResultSection.classList.add("inversa-result-container");
-        inversaResultSection.style.display = 'none';
-        contenedorPrincipal.appendChild(inversaResultSection);
-
-        inversaContainer.appendChild(contenedorPrincipal);
-
-        // Modal para Pasos y Teoría (copia de determinantes.js)
-        const modalOverlay = document.createElement("div");
-        modalOverlay.classList.add("modal-overlay");
-        modalOverlay.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modal-title"></h3>
-                    <button class="close-button">&times;</button>
-                </div>
-                <div class="modal-tabs">
-                    <button class="modal-tab-button active-tab" data-tab="pasos">Pasos de Resolución</button>
-                    <button class="modal-tab-button" data-tab="teoria">Teoría del Método</button>
-                </div>
-                <div class="modal-body">
-                    <div class="tab-content active-content" id="pasos-content">
-                        <h5>Pasos Detallados:</h5>
-                        <div id="steps-list"></div>
-                    </div>
-                    <div class="tab-content" id="teoria-content">
-                        <h5>Teoría del Método: <span id="teoria-method-name"></span></h5>
-                        <div id="teoria-text"></div>
-                    </div>
-                </div>
-            </div>
+    methods.forEach((method, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = method;
+        btn.style.cssText = `
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: ${index === 0 ? '#4285f4' : '#e8f0fe'};
+            color: ${index === 0 ? 'white' : '#5f6368'};
         `;
-        document.body.appendChild(modalOverlay);
-
-        const closeButton = modalOverlay.querySelector(".close-button");
-        closeButton.addEventListener('click', () => modalOverlay.classList.remove('active'));
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('active');
+        
+        btn.addEventListener('mouseenter', () => {
+            if (btn.dataset.active !== 'true') {
+                btn.style.background = '#e8f0fe';
+                btn.style.color = '#4285f4';
             }
         });
-
-        modalOverlay.querySelectorAll('.modal-tab-button').forEach(button => {
-            button.addEventListener('click', function() {
-                modalOverlay.querySelectorAll('.modal-tab-button').forEach(btn => btn.classList.remove('active-tab'));
-                this.classList.add('active-tab');
-
-                modalOverlay.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
-                document.getElementById(`${this.dataset.tab}-content`).classList.add('active-content');
-            });
-        });
-
-        // --- Funciones de Utilidad ---
-        function createMethodButton(text, id) {
-            const button = document.createElement("button");
-            button.textContent = text;
-            button.classList.add("calculator-button");
-            button.dataset.method = id;
-            button.addEventListener('click', () => {
-                methodButtonsContainer.querySelectorAll('.calculator-button').forEach(btn => btn.classList.remove('active-method'));
-                button.classList.add('active-method');
-                selectedMethod = id;
-                clearMatrixInputs();
-                renderMatrixDimensionInput();
-                updateActionButtonsVisibility();
-                errorMessageDiv.textContent = '';
-                inversaResultSection.style.display = 'none';
-                inversaResultSection.innerHTML = '';
-            });
-            return button;
-        }
-
-        function createMatrixDimensionInput() {
-            const matrixInputGroup = document.createElement("div");
-            matrixInputGroup.classList.add("matrix-input-group");
-            matrixInputGroup.dataset.matrixId = "main-matrix";
-
-            const label = document.createElement("label");
-            label.textContent = "Matriz A:";
-            matrixInputGroup.appendChild(label);
-
-            const filasSpan = document.createElement("span");
-            filasSpan.textContent = "filas:";
-            matrixInputGroup.appendChild(filasSpan);
-            const inputFilas = document.createElement("input");
-            inputFilas.type = "number";
-            inputFilas.min = "1";
-            inputFilas.placeholder = "0";
-            inputFilas.classList.add("matrix-dimension-input", "rows-input");
-            matrixInputGroup.appendChild(inputFilas);
-
-            const columnasSpan = document.createElement("span");
-            columnasSpan.textContent = "Columnas:";
-            columnasSpan.classList.add("columnas-label"); // Añadir clase para posible ocultamiento si no es necesario
-            matrixInputGroup.appendChild(columnasSpan);
-            const inputColumnas = document.createElement("input");
-            inputColumnas.type = "number";
-            inputColumnas.min = "1";
-            inputColumnas.placeholder = "0";
-            inputColumnas.classList.add("matrix-dimension-input", "cols-input");
-            matrixInputGroup.appendChild(inputColumnas);
-
-            const matrixActionButtons = document.createElement("div");
-            matrixActionButtons.classList.add("matrix-action-buttons");
-
-            const hacerBtn = document.createElement("button");
-            hacerBtn.textContent = "Hacer";
-            hacerBtn.classList.add("action-button", "hacer");
-            hacerBtn.addEventListener('click', () => {
-                const rows = parseInt(inputFilas.value);
-                const cols = parseInt(inputColumnas.value);
-
-                if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
-                    errorMessageDiv.textContent = "Por favor, ingresa dimensiones válidas (números mayores a 0).";
-                    return;
-                }
-
-                if (rows !== cols) {
-                    errorMessageDiv.textContent = "La matriz debe ser cuadrada para calcular su inversa.";
-                    return;
-                }
-                
-                // Restricción para Adjunta (2x2 y 3x3 para evitar complejidad de menores grandes)
-                if (selectedMethod === 'adjunta' && rows > 3) {
-                     errorMessageDiv.textContent = "El método de la Adjunta es más práctico para matrices 2x2 y 3x3. Para órdenes mayores, considera Gauss-Jordan.";
-                     // Permitir continuar pero con advertencia
-                     // return;
-                }
-
-
-                errorMessageDiv.textContent = '';
-                generateMatrixEditor(rows, cols);
-                hacerBtn.style.display = 'none';
-                updateActionButtonsVisibility();
-            });
-            matrixActionButtons.appendChild(hacerBtn);
-
-            matrixInputGroup.appendChild(matrixActionButtons);
-            return matrixInputGroup;
-        }
-
-        function generateMatrixEditor(rows, cols) {
-            let matrixData;
-            if (currentMatrix && currentMatrix.rows === rows && currentMatrix.cols === cols) {
-                matrixData = currentMatrix.data;
-            } else {
-                matrixData = Array(rows).fill(0).map(() => Array(cols).fill(0));
-            }
-
-            let matrixContainer = document.getElementById(`editor-container-main-matrix`);
-            if (!matrixContainer) {
-                matrixContainer = document.createElement("div");
-                matrixContainer.classList.add("matrix-container");
-                matrixContainer.id = `editor-container-main-matrix`;
-                matricesDisplaySection.appendChild(matrixContainer);
-            } else {
-                matrixContainer.innerHTML = '';
-            }
-
-            const title = document.createElement("h4");
-            title.classList.add("matrix-title");
-            title.textContent = `Matriz A (${rows}x${cols}):`;
-            matrixContainer.appendChild(title);
-
-            const matrixEditorDiv = document.createElement("div");
-            matrixEditorDiv.classList.add("matrix-editor");
-            matrixEditorDiv.style.gridTemplateColumns = `repeat(${cols}, minmax(40px, 1fr))`;
-
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    const input = document.createElement("input");
-                    input.type = "number";
-                    input.value = (matrixData[i] && typeof matrixData[i][j] === 'number') ? matrixData[i][j] : 0;
-                    input.dataset.row = i;
-                    input.dataset.col = j;
-                    input.addEventListener('change', (e) => {
-                        const val = parseFloat(e.target.value);
-                        currentMatrix.data[parseInt(e.target.dataset.row)][parseInt(e.target.dataset.col)] = isNaN(val) ? 0 : val;
-                    });
-                    input.addEventListener('focus', (e) => {
-                        e.target.select();
-                    });
-                    matrixEditorDiv.appendChild(input);
-                }
-            }
-            matrixContainer.appendChild(matrixEditorDiv);
-
-            currentMatrix = { id: "main-matrix", label: "A", rows, cols, data: matrixData };
-            updateActionButtonsVisibility();
-        }
-
-        function renderMatrixDimensionInput() {
-            matrixDimensionSection.innerHTML = '';
-            matricesDisplaySection.innerHTML = '';
-            currentMatrix = null;
-            matrixDimensionSection.appendChild(createMatrixDimensionInput());
-        }
-
-        function updateActionButtonsVisibility() {
-            const hasMatrix = currentMatrix && currentMatrix.data && currentMatrix.rows > 0;
-            solveBtn.style.display = hasMatrix ? 'block' : 'none';
-            viewStepsBtn.style.display = hasMatrix ? 'block' : 'none';
-        }
-
-        function clearMatrixInputs() {
-            matrixDimensionSection.innerHTML = '';
-            matricesDisplaySection.innerHTML = '';
-            currentMatrix = null;
-            errorMessageDiv.textContent = '';
-            inversaResultSection.style.display = 'none';
-            inversaResultSection.innerHTML = '';
-        }
-
-        function displayResultMatrix(resultMatrix, titleText) {
-            inversaResultSection.innerHTML = '';
-            inversaResultSection.style.display = 'block';
-
-            const title = document.createElement("h4");
-            title.textContent = titleText;
-            inversaResultSection.appendChild(title);
-
-            const resultEditorDiv = document.createElement("div");
-            resultEditorDiv.classList.add("inversa-result-matrix-editor");
-            if (resultMatrix.length > 0) {
-                resultEditorDiv.style.gridTemplateColumns = `repeat(${resultMatrix[0].length}, minmax(60px, 1fr))`;
-            }
-
-            for (let i = 0; i < resultMatrix.length; i++) {
-                for (let j = 0; j < resultMatrix[0].length; j++) {
-                    const cell = document.createElement("div");
-                    cell.textContent = resultMatrix[i][j].toFixed(4); // Mostrar con 4 decimales
-                    resultEditorDiv.appendChild(cell);
-                }
-            }
-            inversaResultSection.appendChild(resultEditorDiv);
-        }
-
-        // --- Lógica de Cálculo de Inversas ---
-
-        // Helper para obtener el menor (necesario para Cofactores y Adjunta)
-        function getMinor(matrix, row, col) {
-            return matrix.filter((_, i) => i !== row).map(r => r.filter((_, j) => j !== col));
-        }
-
-        // Helper para calcular el determinante (usado por el método de la Adjunta)
-        // Reutilizamos la lógica de determinantes, simplificada para no generar pasos detallados aquí
-        function calculateDeterminant(matrix) {
-            const n = matrix.length;
-            if (n === 1) return matrix[0][0];
-            if (n === 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
-
-            let det = 0;
-            for (let j = 0; j < n; j++) {
-                const element = matrix[0][j];
-                const minor = getMinor(matrix, 0, j);
-                const sign = (j % 2 === 0) ? 1 : -1;
-                det += sign * element * calculateDeterminant(minor);
-            }
-            return det;
-        }
-
-        // Método de la Matriz Adjunta
-        function calculateInverseAdjunta(matrix, steps) {
-            const n = matrix.length;
-            if (n !== matrix[0].length) {
-                throw new Error("La matriz debe ser cuadrada.");
-            }
-
-            steps.push({ title: "Verificación Inicial", description: `Calculando la inversa para una matriz ${n}x${n} utilizando el método de la Adjunta.` });
-
-            // Paso 1: Calcular el Determinante
-            steps.push({ title: "Paso 1: Calcular el Determinante de A", description: `Primero, calculamos el determinante de la matriz A. Usaremos expansión por cofactores (o Sarrus para 2x2/3x3).` });
-            const detA = calculateDeterminant(matrix);
-            steps.push({ title: "Resultado del Determinante", description: `$$det(A) = ${detA.toFixed(4)}$$` });
-
-            if (Math.abs(detA) < 1e-9) { // Usar una pequeña tolerancia para flotantes
-                throw new Error("El determinante es cero (o muy cercano a cero). La matriz no tiene inversa.");
-            }
-
-            // Paso 2: Calcular la Matriz de Cofactores
-            steps.push({ title: "Paso 2: Calcular la Matriz de Cofactores (C)", description: `Cada elemento $$C_{ij}$$ de la matriz de cofactores se obtiene como $$C_{ij} = (-1)^{i+j} \\cdot det(M_{ij})$$, donde $$M_{ij}$$ es el menor correspondiente.` });
-            const cofactorMatrix = Array(n).fill(0).map(() => Array(n).fill(0));
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    const minorMatrix = getMinor(matrix, i, j);
-                    const minorDet = calculateDeterminant(minorMatrix);
-                    const sign = ((i + j) % 2 === 0) ? 1 : -1;
-                    cofactorMatrix[i][j] = sign * minorDet;
-                }
-            }
-            steps.push({ title: "Matriz de Cofactores (C)", matrix: cofactorMatrix });
-
-            // Paso 3: Calcular la Matriz Adjunta (Adj(A) = C^T)
-            steps.push({ title: "Paso 3: Calcular la Matriz Adjunta (Adj(A))", description: `La matriz adjunta es la transpuesta de la matriz de cofactores. $$Adj(A) = C^T$$` });
-            const adjugateMatrix = Array(n).fill(0).map(() => Array(n).fill(0));
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    adjugateMatrix[j][i] = cofactorMatrix[i][j]; // Transponer
-                }
-            }
-            steps.push({ title: "Matriz Adjunta (Adj(A))", matrix: adjugateMatrix });
-
-            // Paso 4: Calcular la Inversa (A^-1 = (1/det(A)) * Adj(A))
-            steps.push({ title: "Paso 4: Calcular la Inversa", description: `La matriz inversa se calcula como $$A^{-1} = \\frac{1}{det(A)} \\cdot Adj(A)$$ ` });
-            const inverseMatrix = Array(n).fill(0).map(() => Array(n).fill(0));
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    inverseMatrix[i][j] = adjugateMatrix[i][j] / detA;
-                }
-            }
-            steps.push({ title: "Resultado de la Inversa (A⁻¹)", matrix: inverseMatrix });
-
-            return inverseMatrix;
-        }
-
-        // Método de Gauss-Jordan
-        function calculateInverseGaussJordan(matrix, steps) {
-            const n = matrix.length;
-            if (n !== matrix[0].length) {
-                throw new Error("La matriz debe ser cuadrada.");
-            }
-
-            // Crear matriz aumentada [A | I]
-            let augmentedMatrix = Array(n).fill(0).map((_, i) =>
-                Array(2 * n).fill(0).map((_, j) => {
-                    if (j < n) return matrix[i][j];
-                    return (j - n === i) ? 1 : 0;
-                })
-            );
-
-            steps.push({ title: "Inicio de Gauss-Jordan", description: `Se construye una matriz aumentada $$[A | I]$$, donde $$I$$ es la matriz identidad. Aplicaremos operaciones elementales de fila para transformar el lado izquierdo (A) en la matriz identidad. Lo que le suceda al lado izquierdo, le sucederá al lado derecho (I), y al final, el lado derecho será la inversa $$A^{-1}$$.` });
-            steps.push({ title: "Matriz Aumentada Inicial $$[A | I]$$", matrix: augmentedMatrix });
-
-            for (let i = 0; i < n; i++) { // Iterar sobre cada fila para hacer pivotes
-                // Encontrar el pivote: buscar el elemento no-cero más grande en la columna i (desde la fila i hacia abajo)
-                let pivotRow = i;
-                for (let k = i + 1; k < n; k++) {
-                    if (Math.abs(augmentedMatrix[k][i]) > Math.abs(augmentedMatrix[pivotRow][i])) {
-                        pivotRow = k;
-                    }
-                }
-
-                if (augmentedMatrix[pivotRow][i] === 0) {
-                    throw new Error("La matriz es singular (determinante cero) y no tiene inversa.");
-                }
-
-                // Intercambiar filas si el pivote no está en la fila actual
-                if (pivotRow !== i) {
-                    [augmentedMatrix[i], augmentedMatrix[pivotRow]] = [augmentedMatrix[pivotRow], augmentedMatrix[i]];
-                    steps.push({ title: `Intercambio de Filas (F${i + 1} <-> F${pivotRow + 1})`, description: `Se intercambió la fila ${i + 1} con la fila ${pivotRow + 1} para obtener un pivote adecuado.`, matrix: augmentedMatrix });
-                }
-
-                // Normalizar la fila del pivote (hacer que el pivote sea 1)
-                let pivotValue = augmentedMatrix[i][i];
-                if (pivotValue !== 1) { // Evitar división por 1 si ya es 1
-                    steps.push({ title: `Normalización del Pivote (F${i + 1} -> F${i + 1} / ${pivotValue.toFixed(4)})`, description: `Se divide la fila ${i + 1} por el valor del pivote (${pivotValue.toFixed(4)}) para que el elemento diagonal sea 1.`, matrix: augmentedMatrix });
-                    for (let j = 0; j < 2 * n; j++) {
-                        augmentedMatrix[i][j] /= pivotValue;
-                    }
-                }
-                steps.push({ title: `Matriz Aumentada (Pivote F${i + 1} normalizado)`, matrix: augmentedMatrix });
-
-
-                // Hacer ceros en las otras filas de la columna actual
-                for (let row = 0; row < n; row++) {
-                    if (row !== i) {
-                        let factor = augmentedMatrix[row][i];
-                        if (factor !== 0) { // Solo si el elemento no es ya cero
-                            steps.push({ title: `Operación de Fila (F${row + 1} -> F${row + 1} - ${factor.toFixed(4)} * F${i + 1})`, description: `Se resta ${factor.toFixed(4)} veces la fila ${i + 1} (fila del pivote) de la fila ${row + 1} para hacer cero el elemento en la columna ${i + 1}.`, matrix: augmentedMatrix });
-                            for (let col = 0; col < 2 * n; col++) {
-                                augmentedMatrix[row][col] -= factor * augmentedMatrix[i][col];
-                            }
-                            steps.push({ title: `Matriz Aumentada (F${row + 1} actualizada)`, matrix: augmentedMatrix });
-                        }
-                    }
-                }
-            }
-
-            steps.push({ title: "Matriz Reducida por Filas", description: `El lado izquierdo de la matriz aumentada se ha transformado en la matriz identidad. El lado derecho es ahora la matriz inversa.`, matrix: augmentedMatrix });
-
-            // Extraer la matriz inversa del lado derecho de la matriz aumentada
-            const inverseMatrix = Array(n).fill(0).map((_, i) =>
-                Array(n).fill(0).map((_, j) => augmentedMatrix[i][j + n])
-            );
-
-            steps.push({ title: "Resultado Final: Matriz Inversa (A⁻¹)", matrix: inverseMatrix });
-            return inverseMatrix;
-        }
-
-        // Helper para mostrar matrices en los pasos
-        function formatMatrixForSteps(matrix) {
-            if (!matrix || matrix.length === 0 || matrix[0].length === 0) {
-                return '<div class="inline-matrix-display"></div>';
-            }
-            let html = '<div class="inline-matrix-display" style="grid-template-columns: repeat(' + matrix[0].length + ', auto);">';
-            for (let i = 0; i < matrix.length; i++) {
-                for (let j = 0; j < matrix[0].length; j++) {
-                    html += `<div>${matrix[i][j].toFixed(4)}</div>`;
-                }
-            }
-            html += '</div>';
-            return html;
-        }
-
-        // --- Event Listeners ---
-        solveBtn.addEventListener('click', () => {
-            if (!currentMatrix || currentMatrix.rows === 0) {
-                errorMessageDiv.textContent = "Por favor, crea y llena una matriz para calcular su inversa.";
-                return;
-            }
-
-            calculationSteps = []; // Reiniciar pasos
-            let inverseResultMatrix;
-            try {
-                if (selectedMethod === 'adjunta') {
-                    inverseResultMatrix = calculateInverseAdjunta(currentMatrix.data, calculationSteps);
-                    displayResultMatrix(inverseResultMatrix, "Matriz Inversa (Método de la Adjunta)");
-                } else if (selectedMethod === 'gauss-jordan') {
-                    inverseResultMatrix = calculateInverseGaussJordan(currentMatrix.data, calculationSteps);
-                    displayResultMatrix(inverseResultMatrix, "Matriz Inversa (Método de Gauss-Jordan)");
-                }
-                errorMessageDiv.textContent = '';
-            } catch (error) {
-                errorMessageDiv.textContent = error.message;
-                inversaResultSection.style.display = 'none';
+        
+        btn.addEventListener('mouseleave', () => {
+            if (btn.dataset.active !== 'true') {
+                btn.style.background = '#e8f0fe';
+                btn.style.color = '#5f6368';
             }
         });
+        
+        methodButtons[method] = btn;
+        leftPanel.appendChild(btn);
+    });
 
-        viewStepsBtn.addEventListener('click', () => {
-            if (!currentMatrix || currentMatrix.rows === 0) {
-                errorMessageDiv.textContent = "Por favor, crea y llena una matriz para ver los pasos/teoría.";
-                return;
-            }
+    // Panel derecho - Contenido
+    const rightPanel = document.createElement('div');
+    rightPanel.style.cssText = `
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+        background: #f8f9fa;
+    `;
 
-            const modalTitle = modalOverlay.querySelector("#modal-title");
-            modalTitle.textContent = `Detalles de la Inversa (Matriz ${currentMatrix.rows}x${currentMatrix.cols})`;
+    // Área de contenido
+    const contentArea = document.createElement('div');
+    contentArea.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        min-height: 400px;
+    `;
 
-            // Mostrar pasos
-            const stepsList = modalOverlay.querySelector("#steps-list");
-            stepsList.innerHTML = '';
-            if (calculationSteps.length === 0) {
-                try {
-                    let tempSteps = [];
-                    if (selectedMethod === 'adjunta') {
-                        calculateInverseAdjunta(currentMatrix.data, tempSteps);
-                    } else if (selectedMethod === 'gauss-jordan') {
-                        calculateInverseGaussJordan(currentMatrix.data, tempSteps);
-                    }
-                    calculationSteps = tempSteps; // Guardar los pasos generados
-                } catch (error) {
-                    stepsList.innerHTML = `<p style="color:red;">Error al generar los pasos: ${error.message}</p>`;
-                    return;
-                }
-            }
+    // Variables globales
+    let currentMethod = 'Método de Adjunta';
+    let matrixSize = 2;
+    let matrixInputs = [];
 
-            if (calculationSteps.length > 0) {
-                calculationSteps.forEach((step, index) => {
-                    const stepItem = document.createElement("div");
-                    stepItem.classList.add("step-item");
-                    let descriptionHtml = step.description;
-                    if (step.matrix) {
-                        descriptionHtml += `<br>${formatMatrixForSteps(step.matrix)}`;
-                    }
-                    stepItem.innerHTML = `<h6>Paso ${index + 1}: ${step.title}</h6><p>${descriptionHtml}</p>`;
-                    stepsList.appendChild(stepItem);
-                });
-            } else {
-                stepsList.innerHTML = "<p>No se generaron pasos para esta operación o método. Intenta calcular la inversa primero.</p>";
-            }
-
-            // Mostrar teoría
-            const teoriaMethodName = modalOverlay.querySelector("#teoria-method-name");
-            const teoriaText = modalOverlay.querySelector("#teoria-text");
-            teoriaMethodName.textContent = selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1).replace('-', ' ');
-            teoriaText.innerHTML = getMethodTheory(selectedMethod);
-
-            modalOverlay.classList.add('active');
-            modalOverlay.querySelector('[data-tab="pasos"]').click(); // Asegurarse de que la pestaña de pasos esté activa por defecto
-
-            MathJax.typesetPromise(); // Renderizar ecuaciones LaTeX
-        });
-
-        function getMethodTheory(method) {
-            let theory = "";
-            switch (method) {
-                case 'adjunta':
-                    theory = `
-                        <p>El <strong>Método de la Matriz Adjunta</strong> para calcular la inversa de una matriz cuadrada $$A$$ (si existe) se basa en la siguiente fórmula:</p>
-                        <p class="math-formula">$$A^{-1} = \\frac{1}{det(A)} \\cdot Adj(A)$$</p>
-                        <p>Donde:</p>
-                        <ul>
-                            <li>$$det(A)$$ es el determinante de la matriz $$A$$.</li>
-                            <li>$$Adj(A)$$ es la matriz adjunta de $$A$$, que es la transpuesta de la matriz de cofactores de $$A$$.</li>
-                        </ul>
-                        <h5>Pasos principales:</h5>
-                        <ol>
-                            <li><strong>Calcular el determinante ($$det(A)$$):</strong> Si $$det(A) = 0$$, la matriz es singular y no tiene inversa.</li>
-                            <li><strong>Calcular la Matriz de Cofactores ($$C$$):</strong> Cada elemento $$C_{ij}$$ se obtiene como $$C_{ij} = (-1)^{i+j} \\cdot det(M_{ij})$$, donde $$M_{ij}$$ es la submatriz (menor) de $$A$$ eliminando la fila $$i$$ y la columna $$j$$.</li>
-                            <li><strong>Calcular la Matriz Adjunta ($$Adj(A)$$):</strong> Se obtiene transponiendo la matriz de cofactores, es decir, $$Adj(A) = C^T$$.</li>
-                            <li><strong>Multiplicar por el inverso del determinante:</strong> Finalmente, la inversa se obtiene multiplicando la matriz adjunta por $$1/det(A)$$.</li>
-                        </ol>
-                        <p>Este método es computacionalmente intensivo para matrices grandes, ya que requiere el cálculo de $$n^2$$ determinantes de orden $$(n-1)$$.</p>
-                    `;
-                    break;
-                case 'gauss-jordan':
-                    theory = `
-                        <p>El <strong>Método de Gauss-Jordan</strong> es una forma eficiente de calcular la inversa de una matriz cuadrada $$A$$ (si existe) utilizando operaciones elementales de fila.</p>
-                        <h5>Proceso:</h5>
-                        <ol>
-                            <li><strong>Formar la matriz aumentada:</strong> Se crea una matriz aumentada adjuntando la matriz identidad ($$I$$) de las mismas dimensiones a la matriz original $$A$$. Esto se representa como $$[A | I]$$.</li>
-                            <li><strong>Aplicar operaciones elementales de fila:</strong> El objetivo es transformar el lado izquierdo (matriz $$A$$) en la matriz identidad ($$I$$) mediante una serie de operaciones elementales de fila. Las operaciones permitidas son:
-                                <ul>
-                                    <li>Intercambiar dos filas.</li>
-                                    <li>Multiplicar una fila por un escalar no nulo.</li>
-                                    <li>Sumar un múltiplo de una fila a otra fila.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Resultado:</strong> Si el lado izquierdo se convierte en la matriz identidad ($$I$$), entonces el lado derecho será la matriz inversa de $$A$$ ($$A^{-1}$$). La matriz aumentada final será $$[I | A^{-1}]$$.</li>
-                        </ol>
-                        <p>Si en algún punto del proceso no se puede obtener una matriz identidad en el lado izquierdo (por ejemplo, si se obtiene una fila de ceros en el lado izquierdo), significa que la matriz original es singular y no tiene inversa.</p>
-                    `;
-                    break;
-                default:
-                    theory = "<p>Selecciona un método para ver su teoría.</p>";
-            }
-            return theory;
+    // Función para crear selector de tamaño
+    function createSizeSelector() {
+        const selectorContainer = document.createElement('div');
+        selectorContainer.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        `;
+        
+        const label = document.createElement('label');
+        label.textContent = 'Tamaño de la matriz:';
+        label.style.cssText = `
+            color: #5f6368;
+            font-weight: 500;
+            font-size: 16px;
+        `;
+        
+        const select = document.createElement('select');
+        select.style.cssText = `
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        `;
+        
+        // Agregar opciones de tamaño (2x2 a 5x5)
+        for (let i = 2; i <= 5; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i}x${i}`;
+            if (i === matrixSize) option.selected = true;
+            select.appendChild(option);
         }
-
-        // Inicialización
-        adjuntaBtn.classList.add('active-method'); // Seleccionar Adjunta por defecto
-        renderMatrixDimensionInput(); // Mostrar los inputs de dimensión al cargar
-        updateActionButtonsVisibility(); // Ocultar botones de acción hasta que haya matriz
+        
+        select.addEventListener('focus', () => select.style.borderColor = '#4285f4');
+        select.addEventListener('blur', () => select.style.borderColor = '#e9ecef');
+        select.addEventListener('change', () => {
+            matrixSize = parseInt(select.value);
+            renderMatrix();
+        });
+        
+        selectorContainer.appendChild(label);
+        selectorContainer.appendChild(select);
+        
+        return selectorContainer;
     }
+
+    // Función para crear matriz
+    function renderMatrix() {
+        const existingMatrix = document.getElementById('matrix-container');
+        if (existingMatrix) {
+            existingMatrix.remove();
+        }
+        
+        const matrixContainer = document.createElement('div');
+        matrixContainer.id = 'matrix-container';
+        matrixContainer.style.cssText = `
+            margin-bottom: 30px;
+        `;
+        
+        const matrixTitle = document.createElement('h3');
+        matrixTitle.textContent = 'Matriz A';
+        matrixTitle.style.cssText = `
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        `;
+        
+        const grid = document.createElement('div');
+        grid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(${matrixSize}, 1fr);
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        `;
+        
+        matrixInputs = [];
+        for (let i = 0; i < matrixSize; i++) {
+            matrixInputs[i] = [];
+            for (let j = 0; j < matrixSize; j++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = i === j ? '1' : '0'; // Matriz identidad por defecto
+                input.style.cssText = `
+                    width: 100%;
+                    padding: 12px;
+                    border: none;
+                    border-radius: 8px;
+                    text-align: center;
+                    font-size: 16px;
+                    font-weight: 500;
+                    background: rgba(255, 255, 255, 0.9);
+                    transition: all 0.2s;
+                    backdrop-filter: blur(10px);
+                `;
+                input.addEventListener('focus', () => {
+                    input.style.background = 'white';
+                    input.style.boxShadow = '0 0 0 3px rgba(66, 133, 244, 0.3)';
+                });
+                input.addEventListener('blur', () => {
+                    input.style.background = 'rgba(255, 255, 255, 0.9)';
+                    input.style.boxShadow = 'none';
+                });
+                matrixInputs[i][j] = input;
+                grid.appendChild(input);
+            }
+        }
+        
+        matrixContainer.appendChild(matrixTitle);
+        matrixContainer.appendChild(grid);
+        
+        // Insertar antes de los botones
+        const buttonContainer = document.getElementById('button-container');
+        contentArea.insertBefore(matrixContainer, buttonContainer);
+    }
+
+    // Función para crear botones de acción
+    function createActionButtons() {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.id = 'button-container';
+        buttonContainer.style.cssText = `
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        `;
+        
+        const calculateBtn = document.createElement('button');
+        calculateBtn.textContent = 'Calcular Inversa';
+        calculateBtn.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        `;
+        calculateBtn.addEventListener('mouseenter', () => calculateBtn.style.transform = 'translateY(-2px)');
+        calculateBtn.addEventListener('mouseleave', () => calculateBtn.style.transform = 'translateY(0)');
+        calculateBtn.addEventListener('click', calculateInverse);
+        
+        const stepsBtn = document.createElement('button');
+        stepsBtn.textContent = 'Ver Pasos';
+        stepsBtn.style.cssText = `
+            background: #34a853;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(52, 168, 83, 0.4);
+        `;
+        stepsBtn.addEventListener('mouseenter', () => {
+            stepsBtn.style.transform = 'translateY(-2px)';
+            stepsBtn.style.background = '#2d8c47';
+        });
+        stepsBtn.addEventListener('mouseleave', () => {
+            stepsBtn.style.transform = 'translateY(0)';
+            stepsBtn.style.background = '#34a853';
+        });
+        stepsBtn.addEventListener('click', showSteps);
+        
+        buttonContainer.appendChild(calculateBtn);
+        buttonContainer.appendChild(stepsBtn);
+        
+        return buttonContainer;
+    }
+
+    // Función para obtener valores de la matriz
+    function getMatrixValues() {
+        const values = [];
+        for (let i = 0; i < matrixSize; i++) {
+            values[i] = [];
+            for (let j = 0; j < matrixSize; j++) {
+                values[i][j] = parseFloat(matrixInputs[i][j].value) || 0;
+            }
+        }
+        return values;
+    }
+
+    // Función para calcular determinante (necesario para verificar inversibilidad)
+    function calculateDeterminant(matrix) {
+        const n = matrix.length;
+        
+        if (n === 1) return matrix[0][0];
+        if (n === 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+        
+        let det = 0;
+        for (let j = 0; j < n; j++) {
+            const minor = getMinor(matrix, 0, j);
+            const cofactor = Math.pow(-1, j) * calculateDeterminant(minor);
+            det += matrix[0][j] * cofactor;
+        }
+        
+        return det;
+    }
+
+    // Obtener menor de una matriz
+    function getMinor(matrix, row, col) {
+        const n = matrix.length;
+        const minor = [];
+        
+        for (let i = 0; i < n; i++) {
+            if (i === row) continue;
+            const newRow = [];
+            for (let j = 0; j < n; j++) {
+                if (j === col) continue;
+                newRow.push(matrix[i][j]);
+            }
+            minor.push(newRow);
+        }
+        
+        return minor;
+    }
+
+    // Función para calcular matriz inversa
+    function calculateInverse() {
+        const matrix = getMatrixValues();
+        
+        try {
+            // Verificar que la matriz sea invertible
+            const det = calculateDeterminant(matrix);
+            if (Math.abs(det) < 1e-10) {
+                throw new Error('La matriz no es invertible (determinante = 0)');
+            }
+            
+            let result;
+            switch (currentMethod) {
+                case 'Método de Adjunta':
+                    result = calculateAdjugateMethod(matrix);
+                    break;
+                case 'Método de Gauss-Jordan':
+                    result = calculateGaussJordanMethod(matrix);
+                    break;
+            }
+            
+            showResult(result, det);
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    // Método de la Adjunta
+    function calculateAdjugateMethod(matrix) {
+        const n = matrix.length;
+        const det = calculateDeterminant(matrix);
+        
+        // Calcular matriz de cofactores
+        const cofactorMatrix = [];
+        for (let i = 0; i < n; i++) {
+            cofactorMatrix[i] = [];
+            for (let j = 0; j < n; j++) {
+                const minor = getMinor(matrix, i, j);
+                const minorDet = calculateDeterminant(minor);
+                cofactorMatrix[i][j] = Math.pow(-1, i + j) * minorDet;
+            }
+        }
+        
+        // Transponer la matriz de cofactores para obtener la adjunta
+        const adjugate = [];
+        for (let i = 0; i < n; i++) {
+            adjugate[i] = [];
+            for (let j = 0; j < n; j++) {
+                adjugate[i][j] = cofactorMatrix[j][i];
+            }
+        }
+        
+        // Dividir cada elemento por el determinante
+        const inverse = [];
+        for (let i = 0; i < n; i++) {
+            inverse[i] = [];
+            for (let j = 0; j < n; j++) {
+                inverse[i][j] = adjugate[i][j] / det;
+            }
+        }
+        
+        return inverse;
+    }
+
+    // Método de Gauss-Jordan
+    function calculateGaussJordanMethod(matrix) {
+        const n = matrix.length;
+        
+        // Crear matriz aumentada [A|I]
+        const augmented = [];
+        for (let i = 0; i < n; i++) {
+            augmented[i] = [];
+            for (let j = 0; j < n; j++) {
+                augmented[i][j] = matrix[i][j];
+            }
+            // Agregar matriz identidad
+            for (let j = 0; j < n; j++) {
+                augmented[i][n + j] = i === j ? 1 : 0;
+            }
+        }
+        
+        // Eliminación de Gauss-Jordan
+        for (let i = 0; i < n; i++) {
+            // Buscar el pivote máximo
+            let maxRow = i;
+            for (let k = i + 1; k < n; k++) {
+                if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
+                    maxRow = k;
+                }
+            }
+            
+            // Intercambiar filas si es necesario
+            if (maxRow !== i) {
+                [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+            }
+            
+            // Verificar que el pivote no sea cero
+            if (Math.abs(augmented[i][i]) < 1e-10) {
+                throw new Error('La matriz no es invertible');
+            }
+            
+            // Hacer el pivote igual a 1
+            const pivot = augmented[i][i];
+            for (let j = 0; j < 2 * n; j++) {
+                augmented[i][j] /= pivot;
+            }
+            
+            // Eliminar la columna
+            for (let k = 0; k < n; k++) {
+                if (k !== i) {
+                    const factor = augmented[k][i];
+                    for (let j = 0; j < 2 * n; j++) {
+                        augmented[k][j] -= factor * augmented[i][j];
+                    }
+                }
+            }
+        }
+        
+        // Extraer la matriz inversa (parte derecha de la matriz aumentada)
+        const inverse = [];
+        for (let i = 0; i < n; i++) {
+            inverse[i] = [];
+            for (let j = 0; j < n; j++) {
+                inverse[i][j] = augmented[i][n + j];
+            }
+        }
+        
+        return inverse;
+    }
+
+    // Función para mostrar resultado
+    function showResult(inverse, det) {
+        const existingResult = document.getElementById('result-display');
+        if (existingResult) {
+            existingResult.remove();
+        }
+        
+        const resultContainer = document.createElement('div');
+        resultContainer.id = 'result-display';
+        resultContainer.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        `;
+        
+        const title = document.createElement('h3');
+        title.textContent = `Matriz Inversa (${currentMethod})`;
+        title.style.cssText = `
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+        `;
+        
+        const detInfo = document.createElement('div');
+        detInfo.textContent = `Determinante: ${det.toFixed(6)}`;
+        detInfo.style.cssText = `
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+        `;
+        
+        // Crear grid para mostrar la matriz inversa
+        const matrixGrid = document.createElement('div');
+        matrixGrid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(${matrixSize}, 1fr);
+            gap: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        `;
+        
+        for (let i = 0; i < matrixSize; i++) {
+            for (let j = 0; j < matrixSize; j++) {
+                const cell = document.createElement('div');
+                cell.textContent = inverse[i][j].toFixed(4);
+                cell.style.cssText = `
+                    background: rgba(255, 255, 255, 0.9);
+                    color: #333;
+                    padding: 12px;
+                    border-radius: 6px;
+                    text-align: center;
+                    font-weight: 500;
+                    font-family: monospace;
+                `;
+                matrixGrid.appendChild(cell);
+            }
+        }
+        
+        resultContainer.appendChild(title);
+        resultContainer.appendChild(detInfo);
+        resultContainer.appendChild(matrixGrid);
+        contentArea.appendChild(resultContainer);
+    }
+
+    // Función para mostrar error
+    function showError(message) {
+        const existingError = document.getElementById('error-display');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        const errorContainer = document.createElement('div');
+        errorContainer.id = 'error-display';
+        errorContainer.style.cssText = `
+            background: #dc3545;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+        `;
+        errorContainer.textContent = message;
+        
+        contentArea.appendChild(errorContainer);
+        
+        setTimeout(() => {
+            errorContainer.remove();
+        }, 5000);
+    }
+
+    // Función para mostrar pasos (placeholder)
+    function showSteps() {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        `;
+        
+        const title = document.createElement('h2');
+        title.textContent = 'Pasos del Cálculo';
+        title.style.cssText = `
+            color: #2c3e50;
+            margin-bottom: 20px;
+        `;
+        
+        const message = document.createElement('p');
+        message.textContent = 'La funcionalidad de mostrar pasos será implementada próximamente.';
+        message.style.cssText = `
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+        `;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Cerrar';
+        closeBtn.style.cssText = `
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        `;
+        closeBtn.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        modalContent.appendChild(title);
+        modalContent.appendChild(message);
+        modalContent.appendChild(closeBtn);
+        modal.appendChild(modalContent);
+        
+        document.body.appendChild(modal);
+    }
+
+    // Función para renderizar método
+    function renderMethod(method) {
+        contentArea.innerHTML = '';
+        currentMethod = method;
+        
+        const methodTitle = document.createElement('h2');
+        methodTitle.textContent = `Método: ${method}`;
+        methodTitle.style.cssText = `
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        `;
+        
+        contentArea.appendChild(methodTitle);
+        contentArea.appendChild(createSizeSelector());
+        contentArea.appendChild(createActionButtons());
+        
+        renderMatrix();
+    }
+
+    // Event listeners para botones de método
+    Object.keys(methodButtons).forEach(method => {
+        methodButtons[method].addEventListener('click', () => {
+            // Actualizar botón activo
+            Object.values(methodButtons).forEach(btn => {
+                btn.style.background = '#e8f0fe';
+                btn.style.color = '#5f6368';
+                btn.dataset.active = 'false';
+            });
+            
+            methodButtons[method].style.background = '#4285f4';
+            methodButtons[method].style.color = 'white';
+            methodButtons[method].dataset.active = 'true';
+            
+            renderMethod(method);
+        });
+    });
+
+    // Inicializar
+    leftPanel.appendChild(title);
+    rightPanel.appendChild(contentArea);
+    mainContainer.appendChild(leftPanel);
+    mainContainer.appendChild(rightPanel);
+    inversaContainer.appendChild(mainContainer);
+
+    // Renderizar método inicial
+    methodButtons['Método de Adjunta'].dataset.active = 'true';
+    renderMethod('Método de Adjunta');
 });
