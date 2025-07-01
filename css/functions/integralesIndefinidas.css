@@ -1,0 +1,396 @@
+/* integralesIndefinidas.css */
+
+/* Contenedor principal de la herramienta de integrales indefinidas */
+.integrales-indefinidas-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    width: 100%;
+    max-width: 800px; /* Ancho máximo similar a otras herramientas */
+    margin: 0 auto; /* Centrar el contenedor */
+    background-color: #ffffff; /* Fondo blanco */
+    border-radius: var(--border-radius); /* Bordes redondeados */
+    box-shadow: var(--shadow-md); /* Sombra */
+}
+
+/* Título de la sección */
+.integrales-indefinidas-container h2 {
+    color: var(--primary-color); /* Color primario */
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+/* Área de entrada de la función */
+.integral-input-group {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.integral-input-group label {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+/* Estilo para el campo de entrada de MathLive */
+.math-input {
+    width: 100%;
+    max-width: 400px; /* Ancho máximo para el campo de entrada */
+    border: 2px solid #cbd5e1; /* Color de borde */
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    font-size: 1.25rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    --plchf-font-size: 1.25rem; /* Tamaño de fuente para el placeholder de MathLive */
+}
+
+.math-input:focus-within {
+    border-color: var(--primary-color); /* Resaltar al enfocar */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Anillo de enfoque */
+    outline: none;
+}
+
+/* Estilo para el botón de cálculo */
+.calculate-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: var(--border-radius);
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: 0.5rem;
+}
+
+.calculate-button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calculate-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Contenedor del resultado de la integral */
+.integral-result {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--sidebar-bg); /* Un fondo ligeramente diferente para el resultado */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    text-align: left; /* Alineación de texto a la izquierda para el resultado */
+}
+
+.integral-result h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.integral-result p {
+    font-size: 1.1rem;
+    color: #334155;
+    margin-bottom: 0.5rem;
+}
+
+/* Estilo para la fórmula matemática del resultado */
+.integral-result .math-output {
+    background-color: #e2e8f0;
+    padding: 0.8rem;
+    border-radius: var(--border-radius);
+    font-family: 'MathJax_Main', serif; /* Para que se vea bien la notación */
+    overflow-x: auto; /* Para scroll si la expresión es muy larga */
+}
+
+.integral-result .math-output math-field {
+    width: 100%; /* Asegurarse de que el campo mathlive ocupe todo el ancho */
+    --plchf-font-size: 1.25rem; /* Tamaño de fuente para el math-field de salida */
+    --plchf-line-height: 1.5;
+}
+
+
+/* Mensajes de error */
+.error-message {
+    color: #ef4444; /* Rojo para errores */
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+
+/* --- Estilos para la Gráfica --- */
+.graph-container { /* Renombrado de .integral-graph-container a .graph-container para coincidir con el JS */
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #f8fafc; /* Fondo ligeramente distinto para la gráfica */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    height: 400px; /* Altura fija para la gráfica */
+    text-align: center; /* Centrar el título de la gráfica si lo tuviera */
+}
+
+/* Estilos de media query para responsividad (si aplica) */
+@media (max-width: 600px) {
+    .integrales-indefinidas-container {
+        padding: 1.5rem;
+    }
+
+    .integrales-indefinidas-container h2 {
+        font-size: 1.6rem;
+    }
+
+    .integral-input-group label {
+        font-size: 1rem;
+    }
+
+    .math-input {
+        font-size: 1rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .calculate-button {
+        font-size: 1rem;
+        padding: 0.7rem 1.5rem;
+    }
+
+    .integral-result {
+        padding: 1rem;
+    }
+
+    .integral-result h3 {
+        font-size: 1.2rem;
+    }
+
+    .integral-result p {
+        font-size: 0.95rem;
+    }
+
+    .integral-result .math-output {
+        padding: 0.6rem;
+    }
+
+    .graph-container {
+        height: 300px; /* Reducir altura en pantallas pequeñas */
+        padding: 1rem;
+    }
+}
+
+/* Estilos para la sección de pasos detallados */
+.steps-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+}
+
+.steps-container h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* Botón para mostrar/ocultar pasos */
+.toggle-steps-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--border-radius);
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toggle-steps-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-steps-btn:active {
+    transform: translateY(0);
+}
+
+.toggle-steps-btn::before {
+    content: "▼";
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+
+/* Contenedor del contenido de los pasos */
+.steps-content {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos para cada paso individual */
+.step-item {
+    margin-bottom: 1.5rem;
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.step-item:hover {
+    border-left-color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transform: translateX(2px);
+}
+
+.step-item:last-child {
+    margin-bottom: 0;
+    border-left-color: #10b981; /* Verde para el resultado final */
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+/* Título del paso */
+.step-title {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-title::before {
+    content: counter(step-counter);
+    counter-increment: step-counter;
+    background: var(--primary-color);
+    color: white;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* Reiniciar contador para cada lista de pasos */
+.steps-list {
+    counter-reset: step-counter;
+}
+
+/* Contenedor de la fórmula matemática */
+.step-formula {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: calc(var(--border-radius) - 2px);
+    margin: 0.75rem 0;
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+}
+
+.step-formula math-field {
+    width: 100%;
+    --plchf-font-size: 1.1rem;
+    --plchf-line-height: 1.4;
+}
+
+/* Descripción de la regla aplicada */
+.step-rule {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-style: italic;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #f8fafc;
+    border-radius: calc(var(--border-radius) - 2px);
+    border-left: 2px solid #cbd5e1;
+}
+
+.step-rule::before {
+    content: "📝 ";
+    margin-right: 0.25rem;
+}
+
+/* Estilos responsivos para pasos */
+@media (max-width: 600px) {
+    .steps-container {
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .steps-container h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .toggle-steps-btn {
+        font-size: 0.9rem;
+        padding: 0.5rem 1.2rem;
+    }
+
+    .steps-content {
+        padding: 1rem;
+    }
+
+    .step-item {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .step-title {
+        font-size: 0.95rem;
+    }
+
+    .step-formula {
+        padding: 0.75rem;
+    }
+
+    .step-rule {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+    }
+}

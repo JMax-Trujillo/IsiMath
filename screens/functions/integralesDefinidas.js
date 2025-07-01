@@ -1,3 +1,5 @@
+// integralesDefinidas.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const containerIntegralesDefinidas = document.getElementById('integrales-definidas');
     containerIntegralesDefinidas.textContent = '';
